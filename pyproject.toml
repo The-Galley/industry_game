@@ -1,0 +1,107 @@
+[tool.poetry]
+name = "industry-game"
+version = "0.1.0"
+description = "Meta game about industrialization and rise"
+authors = ["Sergey Natalenko <sergey.natalenko@mail.ru>"]
+license = "MIT"
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.12"
+aiomisc = {extras = ["aiohttp", "uvloop"], version = "^17.3.41"}
+sqlalchemy = "^2.0.25"
+alembic = "^1.13.1"
+python-socketio = "^5.11.0"
+aiomisc-dependency = "^0.1.20"
+asyncpg = "^0.29.0"
+configargparse = "^1.7"
+pydantic = "^2.6.0"
+orjson = "^3.9.12"
+aiohttp = {extras = ["speedups"], version = "^3.9.3"}
+greenlet = "^3.0.3"
+
+[tool.poetry.group.dev.dependencies]
+mypy = "^1.8.0"
+pre-commit = "^3.6.0"
+bandit = "^1.7.7"
+ruff = "^0.2.0"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
+
+
+[tool.pytest.ini_options]
+asyncio_mode = "auto"
+python_files = "test_*"
+python_functions = "test_*"
+python_classes = "TestSuite*"
+addopts = "-p no:cacheprovider"
+
+[tool.black]
+target-version = ["py312"]
+
+[tool.isort]
+known_local_folder = ["industry_game", "tests"]
+py_version = "312"
+profile = "black"
+
+[tool.mypy]
+plugins = ["pydantic.mypy"]
+check_untyped_defs = true
+disallow_incomplete_defs = true
+disallow_untyped_defs = true
+ignore_missing_imports = false
+no_implicit_optional = true
+
+[[tool.mypy.overrides]]
+module = "aiomisc_dependency.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "configargparse.*"
+ignore_missing_imports = true
+
+[[tool.mypy.overrides]]
+module = "socketio.*"
+ignore_missing_imports = true
+
+[tool.ruff]
+exclude = [
+    ".git",
+    ".mypy_cache",
+    ".ruff_cache",
+    ".venv",
+]
+
+line-length = 88
+indent-width = 4
+
+target-version = "py312"
+
+[tool.ruff.lint]
+select = [
+    "BLE",
+    "C90",
+    "E",
+    "F",
+    "G",
+    "I",
+    "ICN",
+    "ISC",
+    "PLE",
+    "Q",
+    "RUF006",
+    "RUF100",
+    "T10",
+    "T20",
+    "TID",
+    "UP",
+    "W",
+]
+ignore = ["ISC001"]
+fixable = ["ALL"]
+
+[tool.ruff.format]
+quote-style = "double"
+indent-style = "space"
