@@ -1,8 +1,14 @@
 import argparse
+from base64 import b64decode
 
 import configargparse
 from aiomisc.log import LogFormat, LogLevel
 from yarl import URL
+
+
+def load_base64(value: str) -> str:
+    return b64decode(value).decode()
+
 
 parser = configargparse.ArgumentParser(
     allow_abbrev=False,
@@ -41,3 +47,5 @@ group.add_argument("--pg-dsn", required=True, type=URL)
 
 group = parser.add_argument_group("Security")
 group.add_argument("--secret", type=str, default="secret")
+group.add_argument("--private-key", type=load_base64, required=True)
+group.add_argument("--public-key", type=load_base64, required=True)

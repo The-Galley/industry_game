@@ -1,3 +1,30 @@
 version: '3.8'
 services:
-  nginx:
+  db:
+    image: postgres:15
+    restart: on-filure
+    ports:
+      - "5432:5432"
+    environment:
+      POSTGRES_USER: $POSTGRES_USER
+      POSTGRES_PASSWORD: $POSTGRESS_PASSWORD
+      POSTGRES_DB: $POSTGRES_DB
+
+  rest:
+    restart: on-failure
+    image: andytakker/industry-game-rest:latest
+    command: python -m industry_game
+    environment:
+      APP_API_ADDRESS: 0.0.0.0
+      APP_API_PORT: 80
+
+      APP_PG_DSN: postgresql+asyncpg://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+
+      APP_POOL_SIZE: 8
+
+      APP_LOG_LEVEL: info
+      APP_LOG_FORMAT: json
+
+      APP_SECRET: $APP_SECRET
+      APP_PRIVATE_KEY: $APP_PRIVATE_KEY
+      APP_PUBLIC_KEY: $APP_PUBLIC_KEY

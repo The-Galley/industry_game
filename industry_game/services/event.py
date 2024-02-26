@@ -7,7 +7,7 @@ from typing import Any
 from aiomisc import Service
 
 from industry_game.utils.events.models import AbstractEvent
-from industry_game.utils.events.processor import TimeEventProcessor
+from industry_game.utils.events.processor import EventProcessor
 from industry_game.utils.typed import not_none
 
 log = logging.getLogger(__name__)
@@ -16,7 +16,7 @@ log = logging.getLogger(__name__)
 class EventService(Service):
     event_queue: asyncio.Queue
     worker_task: asyncio.Task
-    processor: TimeEventProcessor
+    processor: EventProcessor
 
     async def start(self) -> Any:
         log.info("Start TimeEventWorker")

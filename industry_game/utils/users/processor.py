@@ -11,7 +11,6 @@ from industry_game.utils.users.base import (
     AuthUserModel,
     RegisterPlayerModel,
 )
-from industry_game.utils.users.models import FullUser
 from industry_game.utils.users.storage import PlayerStorage
 
 
@@ -19,17 +18,19 @@ from industry_game.utils.users.storage import PlayerStorage
 class PlayerProcessor:
     player_storage: PlayerStorage
     passgen: Passgen
-    jwt_provider: JwtAuthrorizationProvider
+    authorization_provider: JwtAuthrorizationProvider
 
-    async def register(self, player: RegisterPlayerModel) -> FullUser:
+    async def register(self, player: RegisterPlayerModel) -> AuthToken:
         if await self.player_storage.read_by_username(username=player.username):
             raise UserWithUsernameAlreadExistsException(
                 username=player.username
             )
-        return await self.player_storage.create(
+        user = await self.player_storage.create(
             username=player.username,
             password_hash=self.passgen.hashpw(player.password),
         )
+        token = self.authorization_provider.generate_token(user=user)
+        return AuthToken(token=token)
 
     async def login(self, player: AuthUserModel) -> AuthToken:
         user = await self.player_storage.get_by_username_and_password_hash(
@@ -38,5 +39,5 @@ class PlayerProcessor:
         )
         if user is None:
             raise UserNotFoundException
-        token = self.jwt_provider.generate_token(user=user)
+        token = self.authorization_provider.generate_token(user=user)
         return AuthToken(token=token)

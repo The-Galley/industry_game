@@ -6,7 +6,7 @@ from uuid import UUID
 from sqlalchemy import insert, update
 from sqlalchemy.ext.asyncio import AsyncSession
 
-from industry_game.db.models import Event
+from industry_game.db.models import Event  # type: ignore[attr-defined]
 from industry_game.utils.db import AbstractStorage, inject_session
 from industry_game.utils.events.base import EventStatus, EventType
 

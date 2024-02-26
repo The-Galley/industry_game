@@ -14,10 +14,13 @@ from industry_game.utils.http.auth.jwt import (
     JwtAuthrorizationProvider,
     JwtProcessor,
 )
+from industry_game.utils.lobby.storage import LobbyStorage
+from industry_game.utils.security import Passgen
+from industry_game.utils.users.processor import PlayerProcessor
 from industry_game.utils.users.storage import PlayerStorage
 
 
-def config_deps(args: Namespace) -> None:
+def config_deps(args: Namespace) -> None:  # noqa: C901
     @dependency
     async def engine() -> AsyncGenerator[AsyncEngine, None]:
         engine = create_async_engine(
@@ -38,6 +41,12 @@ def config_deps(args: Namespace) -> None:
         session_factory: async_sessionmaker[AsyncSession],
     ) -> GameStorage:
         return GameStorage(session_factory=session_factory)
+
+    @dependency
+    def lobby_storage(
+        session_factory: async_sessionmaker[AsyncSession],
+    ) -> LobbyStorage:
+        return LobbyStorage(session_factory=session_factory)
 
     @dependency
     def player_storage(
@@ -61,3 +70,19 @@ def config_deps(args: Namespace) -> None:
         jwt_processor: JwtProcessor,
     ) -> JwtAuthrorizationProvider:
         return JwtAuthrorizationProvider(jwt_processor=jwt_processor)
+
+    @dependency
+    def passgen() -> Passgen:
+        return Passgen(secret=args.secret)
+
+    @dependency
+    def player_processor(
+        player_storage: PlayerStorage,
+        authorization_provider: JwtAuthrorizationProvider,
+        passgen: Passgen,
+    ) -> PlayerProcessor:
+        return PlayerProcessor(
+            player_storage=player_storage,
+            passgen=passgen,
+            authorization_provider=authorization_provider,
+        )

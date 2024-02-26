@@ -16,16 +16,16 @@ class RegisterPlayerHandler(View, DependenciesMixin, AuthMixin):
             raise HTTPConflict(reason="You are already registered!")
         player = await self.parse_player_model()
         try:
-            user = await self.player_processor.register(player=player)
+            auth_token = await self.player_processor.register(player=player)
         except UserWithUsernameAlreadExistsException:
             raise HTTPBadRequest(
                 reason="User with that username already exists"
             )
-        return msgspec_json_response(user, status=HTTPStatus.CREATED)
+        return msgspec_json_response(auth_token, status=HTTPStatus.CREATED)
 
     async def parse_player_model(self) -> RegisterPlayerModel:
         body = await self.request.read()
         try:
             return RegisterPlayerModel.model_validate_json(body)
         except ValidationError:
-            raise HTTPBadRequest
+            raise HTTPBadRequest(reason="Incorrect input data")
