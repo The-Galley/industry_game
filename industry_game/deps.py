@@ -5,9 +5,16 @@ import socketio
 from aiomisc_dependency import dependency
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
-from industry_game.socketio.test import TestNamespace
-from industry_game.storages.ping import PingStorage
-from industry_game.utils.db import create_async_engine, create_async_session_factory
+from industry_game.utils.db import (
+    create_async_engine,
+    create_async_session_factory,
+)
+from industry_game.utils.games.storage import GameStorage
+from industry_game.utils.http.auth.jwt import (
+    JwtAuthrorizationProvider,
+    JwtProcessor,
+)
+from industry_game.utils.users.storage import PlayerStorage
 
 
 def config_deps(args: Namespace) -> None:
@@ -21,17 +28,36 @@ def config_deps(args: Namespace) -> None:
         await engine.dispose()
 
     @dependency
-    async def session_factory(engine: AsyncEngine) -> async_sessionmaker[AsyncSession]:
+    async def session_factory(
+        engine: AsyncEngine,
+    ) -> async_sessionmaker[AsyncSession]:
         return create_async_session_factory(engine=engine)
 
     @dependency
-    def ping_storage(
+    def game_storage(
         session_factory: async_sessionmaker[AsyncSession],
-    ) -> PingStorage:
-        return PingStorage(session_factory=session_factory)
+    ) -> GameStorage:
+        return GameStorage(session_factory=session_factory)
+
+    @dependency
+    def player_storage(
+        session_factory: async_sessionmaker[AsyncSession],
+    ) -> PlayerStorage:
+        return PlayerStorage(session_factory=session_factory)
 
     @dependency
     def sio() -> socketio.AsyncServer:
-        server = socketio.AsyncServer(async_mode="aiohttp", logger=True)
-        server.register_namespace(TestNamespace("/"))
-        return server
+        return socketio.AsyncServer(async_mode="aiohttp")
+
+    @dependency
+    def jwt_processor() -> JwtProcessor:
+        return JwtProcessor(
+            private_key=args.private_key,
+            public_key=args.public_key,
+        )
+
+    @dependency
+    def authorization_provider(
+        jwt_processor: JwtProcessor,
+    ) -> JwtAuthrorizationProvider:
+        return JwtAuthrorizationProvider(jwt_processor=jwt_processor)

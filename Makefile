@@ -15,7 +15,7 @@ clean_dev:
 	rm -rf .venv/
 
 develop: clean_dev  ##@Develop Create project venv
-	python3.11 -m venv .venv
+	python3.12 -m venv .venv
 	.venv/bin/pip install -U pip poetry
 	.venv/bin/poetry config virtualenvs.create false
 	.venv/bin/poetry install

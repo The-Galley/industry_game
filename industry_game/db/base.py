@@ -28,7 +28,7 @@ metadata = MetaData(naming_convention=convention)  # type:ignore[arg-type]
 class Base:
     metadata: MetaData
 
-    @declared_attr  # type:ignore[arg-type]
+    @declared_attr.directive
     @classmethod
     def __tablename__(cls) -> str:
         name_list = re.findall(r"[A-Z][a-z\d]*", cls.__name__)
@@ -38,14 +38,28 @@ class Base:
 @declarative_mixin
 class TimestampMixin:
     @declared_attr
+    @classmethod
     def created_at(cls) -> Mapped[datetime]:
-        return mapped_column(DateTime, server_default=func.now())
+        return mapped_column(
+            DateTime(timezone=True), server_default=func.utcnow()
+        )
 
     @declared_attr
     def updated_at(cls) -> Mapped[datetime]:
         return mapped_column(
-            DateTime,
-            server_default=func.now(),
-            server_onupdate=func.now(),  # type:ignore[arg-type]
-            onupdate=datetime.now,
+            DateTime(timezone=True),
+            server_default=func.utcnow(),
+            server_onupdate=func.utcnow(),  # type:ignore[arg-type]
+            onupdate=datetime.utcnow,
         )
+
+
+@declarative_mixin
+class StartFinishMixin:
+    @declared_attr
+    def started_at(cls) -> Mapped[datetime | None]:
+        return mapped_column(DateTime(timezone=True), nullable=True)
+
+    @declared_attr
+    def finished_at(cls) -> Mapped[datetime | None]:
+        return mapped_column(DateTime(timezone=True), nullable=True)

@@ -27,7 +27,11 @@ def main() -> None:
         pool_size=args.pool_size,
         debug=args.debug,
     ) as loop:
-        log.info("REST service started")
+        log.info(
+            "REST service started on address %s:%s",
+            args.api_address,
+            args.api_port,
+        )
         loop.run_forever()
 
 

@@ -1,3 +1,4 @@
+import abc
 import os
 from argparse import Namespace
 from collections.abc import Callable, Coroutine
@@ -21,26 +22,37 @@ from industry_game.utils.json import dumps
 PROJECT_PATH = Path(industry_game.__file__).parent.parent.resolve()
 
 
-R = TypeVar("R")
-P = ParamSpec("P")
+class AbstractStorage(abc.ABC):
+    def __init__(
+        self, session_factory: async_sessionmaker[AsyncSession]
+    ) -> None:
+        self.session_factory = session_factory
+
+
+TClass = TypeVar("TClass", bound=AbstractStorage)
+TReturn = TypeVar("TReturn")
+TParams = ParamSpec("TParams")
 
 
 def inject_session(
-    func: Callable[Concatenate[Any, AsyncSession, P], Coroutine[Any, Any, R]],
-) -> Callable[Concatenate[Any, P], Coroutine[Any, Any, R]]:
-    attr_name = "session_factory"
-
+    func: Callable[
+        Concatenate[TClass, AsyncSession, TParams],
+        Coroutine[Any, Any, TReturn],
+    ],
+) -> Callable[Concatenate[TClass, TParams], Coroutine[Any, Any, TReturn]]:
     @wraps(func)
-    async def wrapper(self: Any, *args: P.args, **kwargs: P.kwargs) -> R:
-        session_factory: async_sessionmaker[AsyncSession] = getattr(self, attr_name)
-
-        async with session_factory() as session:
+    async def wrapper(
+        self: TClass, *args: TParams.args, **kwargs: TParams.kwargs
+    ) -> TReturn:
+        async with self.session_factory() as session:
             return await func(self, session, *args, **kwargs)
 
     return wrapper
 
 
-def create_async_engine(connection_uri: str, **engine_kwargs: Any) -> AsyncEngine:
+def create_async_engine(
+    connection_uri: str, **engine_kwargs: Any
+) -> AsyncEngine:
     if engine_kwargs.get("json_serializer") is None:
         engine_kwargs["json_serializer"] = dumps
     if engine_kwargs.get("json_deserializer") is None:
@@ -72,7 +84,9 @@ def create_session_factory(
     return sessionmaker(bind=engine, autoflush=False, autocommit=False)
 
 
-def make_alembic_config(cmd_opts: Namespace, base_path: Path = PROJECT_PATH) -> Config:
+def make_alembic_config(
+    cmd_opts: Namespace, base_path: Path = PROJECT_PATH
+) -> Config:
     if not os.path.isabs(cmd_opts.config):
         cmd_opts.config = str(base_path / "industry_game/db" / cmd_opts.config)
 
@@ -86,7 +100,9 @@ def make_alembic_config(cmd_opts: Namespace, base_path: Path = PROJECT_PATH) -> 
     if not alembic_location:
         raise ValueError
     if not os.path.isabs(alembic_location):
-        config.set_main_option("script_location", str(base_path / alembic_location))
+        config.set_main_option(
+            "script_location", str(base_path / alembic_location)
+        )
 
     if cmd_opts.pg_dsn:
         config.set_main_option("sqlalchemy.url", cmd_opts.pg_dsn)

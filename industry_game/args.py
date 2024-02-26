@@ -11,12 +11,12 @@ parser = configargparse.ArgumentParser(
     formatter_class=argparse.ArgumentDefaultsHelpFormatter,
 )
 
-parser.add_argument("-D", "--debug", action="store_true")
+parser.add_argument("-D", "--debug", action="store_true", default=True)
 parser.add_argument(
     "-s",
     "--pool-size",
     type=int,
-    default=4,
+    default=8,
     help="Thread pool size",
 )
 
@@ -38,3 +38,6 @@ group.add_argument("--api-port", type=int, default=8000)
 
 group = parser.add_argument_group("PostgreSQL options")
 group.add_argument("--pg-dsn", required=True, type=URL)
+
+group = parser.add_argument_group("Security")
+group.add_argument("--secret", type=str, default="secret")

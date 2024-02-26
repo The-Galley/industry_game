@@ -1,19 +1,24 @@
+import asyncio
 import logging
 from http import HTTPStatus
 
 from aiohttp.web import Response, View
 from aiomisc import timeout
+from sqlalchemy import text
+from sqlalchemy.exc import SQLAlchemyError
 
-from industry_game.handlers.base import DependenciesMixin
-from industry_game.utils.http import fast_json_response
+from industry_game.utils.http.deps import DependenciesMixin
+from industry_game.utils.http.response import fast_json_response
 
 log = logging.getLogger(__name__)
 
 
 class PingHandler(View, DependenciesMixin):
-    @timeout(5)
     async def get(self) -> Response:
-        db = await self.ping_storage.ping()
+        try:
+            db = await self._ping()
+        except asyncio.TimeoutError:
+            db = False
         deps = {
             "db": db,
         }
@@ -25,3 +30,12 @@ class PingHandler(View, DependenciesMixin):
             data=deps,
             status=status_code,
         )
+
+    @timeout(1)
+    async def _ping(self) -> bool:
+        try:
+            async with self.session_factory() as session:
+                await session.execute(text("select 1"))
+                return True
+        except SQLAlchemyError:
+            return False

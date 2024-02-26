@@ -19,12 +19,19 @@ pydantic = "^2.6.0"
 orjson = "^3.9.12"
 aiohttp = {extras = ["speedups"], version = "^3.9.3"}
 greenlet = "^3.0.3"
+ujson = "^5.9.0"
+msgpack = "^1.0.7"
+bcrypt = "^4.1.2"
+pyjwt = {extras = ["crypto"], version = "^2.8.0"}
+msgspec = "^0.18.6"
 
 [tool.poetry.group.dev.dependencies]
 mypy = "^1.8.0"
 pre-commit = "^3.6.0"
 bandit = "^1.7.7"
 ruff = "^0.2.0"
+aiomisc-pytest = "^1.1.1"
+polyfactory = "^2.14.1"
 
 [build-system]
 requires = ["poetry-core"]
@@ -32,7 +39,6 @@ build-backend = "poetry.core.masonry.api"
 
 
 [tool.pytest.ini_options]
-asyncio_mode = "auto"
 python_files = "test_*"
 python_functions = "test_*"
 python_classes = "TestSuite*"
@@ -74,7 +80,7 @@ exclude = [
     ".venv",
 ]
 
-line-length = 88
+line-length = 80
 indent-width = 4
 
 target-version = "py312"

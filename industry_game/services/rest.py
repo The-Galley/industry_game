@@ -5,24 +5,94 @@ import socketio
 from aiohttp import hdrs
 from aiohttp.web import Application
 from aiomisc.service.aiohttp import AIOHTTPService
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
+from industry_game.handlers.games.create_game import CreateGameHandler
+from industry_game.handlers.games.list_game import ListGameHandler
+from industry_game.handlers.games.lobby.add_user_to_lobby import (
+    AddUserToGameLobbyHandler,
+)
+from industry_game.handlers.games.lobby.delete_user_from_lobby import (
+    DeleteUserFromLobbyHandler,
+)
+from industry_game.handlers.games.lobby.list_lobby import ListGameLobbyHandler
+from industry_game.handlers.games.lobby.read_lobby import (
+    ReadGameUserLobbyHandler,
+)
+from industry_game.handlers.games.read_by_id_game import ReadByIdGameHandler
+from industry_game.handlers.games.update_game import UpdateGameHandler
 from industry_game.handlers.ping import PingHandler
-from industry_game.storages.ping import PingStorage
+from industry_game.handlers.players.list_player import ListPlayerHandler
+from industry_game.handlers.players.login_player import LoginPlayerHandler
+from industry_game.handlers.players.read_by_id_player import (
+    ReadByIdPlayerHandler,
+)
+from industry_game.handlers.players.register_player import RegisterPlayerHandler
+from industry_game.socketio.admin import AdminNamespace
+from industry_game.socketio.base import DependenciesNamespace
+from industry_game.socketio.player import PlayerNamespace
+from industry_game.utils.games.storage import GameStorage
+from industry_game.utils.http.auth.base import BaseAuthorizationProvider
+from industry_game.utils.lobby.storage import LobbyStorage
+from industry_game.utils.users.storage import PlayerStorage
 
 MEGABYTE = 1024**2
 
-HandlersType = tuple[tuple[str, str, Any], ...]
+ApiHandlersType = tuple[tuple[str, str, Any], ...]
+NamespacesType = tuple[tuple[str, type[DependenciesNamespace]], ...]
 
 
 class REST(AIOHTTPService):
     __dependencies__ = (
-        "ping_storage",
         "sio",
+        "game_storage",
+        "lobby_storage",
+        "player_storage",
+        "authorization_provider",
+        "session_factory",
     )
-    sio: socketio.AsyncServer
-    ping_storage: PingStorage
 
-    ROUTES: HandlersType = ((hdrs.METH_GET, "/api/v1/ping/", PingHandler),)
+    sio: socketio.AsyncServer
+    game_storage: GameStorage
+    lobby_storage: LobbyStorage
+    player_storage: PlayerStorage
+    authorization_provider: BaseAuthorizationProvider
+    session_factory: async_sessionmaker[AsyncSession]
+
+    API_ROUTES: ApiHandlersType = (
+        (hdrs.METH_GET, "/api/v1/ping/", PingHandler),
+        # user handlers
+        (hdrs.METH_GET, "/api/v1/players/", ListPlayerHandler),
+        (hdrs.METH_GET, "/api/v1/players/{player_id}/", ReadByIdPlayerHandler),
+        (hdrs.METH_POST, "/api/v1/players/login/", LoginPlayerHandler),
+        (hdrs.METH_POST, "/api/v1/players/register/", RegisterPlayerHandler),
+        # game handlers
+        (hdrs.METH_GET, "/api/v1/games/", ListGameHandler),
+        (hdrs.METH_POST, "/api/v1/games/", CreateGameHandler),
+        (hdrs.METH_GET, "/api/v1/games/{game_id}/", ReadByIdGameHandler),
+        (hdrs.METH_POST, "/api/v1/games/{game_id}/", UpdateGameHandler),
+        # lobby handlers
+        (hdrs.METH_GET, "/api/v1/games/{game_id}/lobby/", ListGameLobbyHandler),
+        (
+            hdrs.METH_POST,
+            "/api/v1/games/{game_id}/lobby/",
+            AddUserToGameLobbyHandler,
+        ),
+        (
+            hdrs.METH_GET,
+            "/api/v1/games/{game_id}/lobby/status/",
+            ReadGameUserLobbyHandler,
+        ),
+        (
+            hdrs.METH_DELETE,
+            "/api/v1/games/{game_id}/lobby/",
+            DeleteUserFromLobbyHandler,
+        ),
+    )
+    WS_NAMESPACES: NamespacesType = (
+        ("/admin", AdminNamespace),
+        ("/player", PlayerNamespace),
+    )
 
     async def create_application(self) -> Application:
         app = Application(
@@ -35,8 +105,12 @@ class REST(AIOHTTPService):
         return app
 
     def _add_routes(self, app: Application) -> None:
-        for method, path, handler in self.ROUTES:
-            app.router.add_route(method=method, path=path, handler=handler)
+        for method, path, handler in self.API_ROUTES:
+            app.router.add_route(
+                method=method,
+                path=path,
+                handler=handler,
+            )
 
     def _add_middlewares(self, app: Application) -> None:
         pass
@@ -47,3 +121,10 @@ class REST(AIOHTTPService):
 
     def _add_socketio(self, app: Application) -> None:
         self.sio.attach(app)
+        deps = {}
+        for name in chain(self.__dependencies__, self.__required__):
+            deps[name] = getattr(self, name)
+
+        for path, namespace_class in self.WS_NAMESPACES:
+            namespace = namespace_class(deps=deps, namespace=path)
+            self.sio.register_namespace(namespace)

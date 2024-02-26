@@ -6,7 +6,7 @@ from sqlalchemy import pool
 from sqlalchemy.engine import Connection
 from sqlalchemy.ext.asyncio import async_engine_from_config
 
-from industry_game.db.models.base import Base
+from industry_game.db.models import Base
 
 config = context.config
 
