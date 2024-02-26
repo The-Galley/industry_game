@@ -2,8 +2,10 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from industry_game.db.models import User as UserDb
+from industry_game.utils.http.auth.jwt import JwtAuthrorizationProvider
 from industry_game.utils.security import Passgen
 from industry_game.utils.users.base import AuthUser, UserType
+from industry_game.utils.users.processor import PlayerProcessor
 from industry_game.utils.users.storage import PlayerStorage
 
 
@@ -13,6 +15,17 @@ def player_storage(
 ) -> PlayerStorage:
     return PlayerStorage(session_factory=session_factory)
 
+@pytest.fixture
+def player_processor(
+    player_storage: PlayerStorage,
+    authorization_provider: JwtAuthrorizationProvider,
+    passgen: Passgen,
+) -> PlayerProcessor:
+    return PlayerProcessor(
+        player_storage=player_storage,
+        passgen=passgen,
+        authorization_provider=authorization_provider,
+    )
 
 @pytest.fixture
 def admin() -> AuthUser:
