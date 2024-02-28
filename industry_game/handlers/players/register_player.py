@@ -5,6 +5,7 @@ from pydantic import ValidationError
 
 from industry_game.utils.exceptions import UserWithUsernameAlreadExistsException
 from industry_game.utils.http.auth.base import AuthMixin
+from industry_game.utils.http.auth.jwt import AUTH_COOKIE
 from industry_game.utils.http.deps import DependenciesMixin
 from industry_game.utils.http.response import msgspec_json_response
 from industry_game.utils.users.base import RegisterPlayerModel
@@ -21,7 +22,9 @@ class RegisterPlayerHandler(View, DependenciesMixin, AuthMixin):
             raise HTTPBadRequest(
                 reason="User with that username already exists"
             )
-        return msgspec_json_response(auth_token, status=HTTPStatus.CREATED)
+        response = msgspec_json_response(auth_token, status=HTTPStatus.CREATED)
+        response.set_cookie(AUTH_COOKIE, auth_token.token)
+        return response
 
     async def parse_player_model(self) -> RegisterPlayerModel:
         body = await self.request.read()

@@ -5,12 +5,12 @@ from industry_game.utils.http.auth.jwt import (
     JwtAuthrorizationProvider,
     JwtProcessor,
 )
-from industry_game.utils.users.base import AuthUser
-from tests.utils.rsa import (
+from industry_game.utils.rsa import (
     get_private_key,
     stringify_private_key,
     stringify_public_key,
 )
+from industry_game.utils.users.base import AuthUser
 
 
 @pytest.fixture(scope="session")

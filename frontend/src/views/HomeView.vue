@@ -7,18 +7,26 @@
       <span> или </span>
       <span><a href="/login">Войти</a></span>
     </p>
+    <div v-else>
+      <GameListTable />
+    </div>
   </section>
 </template>
 <script>
 
 import { defineComponent } from 'vue';
+import GameListTable from '../components/GameListTable.vue';
 
 export default defineComponent({
   name: 'HomeView',
+  components: {
+    GameListTable,
+  },
   computed : {
     isLoggedIn: function() {
       return this.$store.getters.isAuthenticated;
-    }
+    },
   },
+
 });
 </script>

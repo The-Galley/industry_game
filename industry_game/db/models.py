@@ -88,7 +88,7 @@ class Game(Base, TimestampMixin, StartFinishMixin):
     )
     created_by_id: Mapped[int] = mapped_column(
         Integer,
-        ForeignKey("user.id"),
+        ForeignKey("user.id", ondelete="CASCADE"),
         nullable=False,
         index=True,
     )
@@ -103,10 +103,16 @@ class Game(Base, TimestampMixin, StartFinishMixin):
 
 class UserGameLobby(Base):
     user_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("user.id"), nullable=False, primary_key=True
+        Integer,
+        ForeignKey("user.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
     )
     game_id: Mapped[int] = mapped_column(
-        Integer, ForeignKey("game.id"), nullable=False, primary_key=True
+        Integer,
+        ForeignKey("game.id", ondelete="CASCADE"),
+        nullable=False,
+        primary_key=True,
     )
 
     user: Mapped[User] = relationship(User)

@@ -79,6 +79,7 @@ def upgrade() -> None:
             ["created_by_id"],
             ["user.id"],
             name=op.f("fk__game__created_by_id__user"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint("id", name=op.f("pk__game")),
     )
@@ -96,11 +97,13 @@ def upgrade() -> None:
             ["game_id"],
             ["game.id"],
             name=op.f("fk__user_game_lobby__game_id__game"),
+            ondelete="CASCADE",
         ),
         sa.ForeignKeyConstraint(
             ["user_id"],
             ["user.id"],
             name=op.f("fk__user_game_lobby__user_id__user"),
+            ondelete="CASCADE",
         ),
         sa.PrimaryKeyConstraint(
             "user_id", "game_id", name=op.f("pk__user_game_lobby")

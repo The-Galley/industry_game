@@ -3,6 +3,8 @@ from typing import Any
 import jwt
 from aiohttp.hdrs import AUTHORIZATION
 from aiohttp.web_request import Request
+from cryptography.hazmat.primitives.asymmetric import rsa
+from cryptography.hazmat.primitives.serialization import load_pem_private_key
 
 from industry_game.utils.http.auth.base import BaseAuthorizationProvider
 from industry_game.utils.users.base import AuthUser
@@ -63,6 +65,13 @@ class JwtAuthrorizationProvider(BaseAuthorizationProvider):
         if payload is None:
             return None
         return AuthUser(**payload)
+
+
+def parse_private_key(private_key: str) -> rsa.RSAPrivateKey:
+    return load_pem_private_key(  # type: ignore[return-value]
+        private_key.encode(),
+        password=None,
+    )
 
 
 def _get_token_from_headers(request: Request) -> str | None:

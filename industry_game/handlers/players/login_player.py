@@ -11,6 +11,7 @@ from pydantic import ValidationError
 
 from industry_game.utils.exceptions import UserNotFoundException
 from industry_game.utils.http.auth.base import AuthMixin
+from industry_game.utils.http.auth.jwt import AUTH_COOKIE
 from industry_game.utils.http.deps import DependenciesMixin
 from industry_game.utils.http.response import msgspec_json_response
 from industry_game.utils.users.base import AuthUserModel
@@ -27,7 +28,9 @@ class LoginPlayerHandler(View, DependenciesMixin, AuthMixin):
             raise HTTPNotFound(
                 reason="User with that username and password not found"
             )
-        return msgspec_json_response(auth_token, status=HTTPStatus.OK)
+        response = msgspec_json_response(auth_token, status=HTTPStatus.OK)
+        response.set_cookie(AUTH_COOKIE, auth_token.token)
+        return response
 
     async def parse_player_model(self) -> AuthUserModel:
         body = await self.request.read()
