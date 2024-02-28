@@ -7,18 +7,19 @@ const state = {
 
 const getters = {
   isAuthenticated: state => !!state.user,
+  isAdmin: state => state?.user?.type === 'ADMIN',
+  isPlayer: state => state?.user?.type === 'PLAYER',
   stateUser: state => state.user,
 };
 
 const actions = {
-  // eslint-disable-next-line no-empty-pattern
-  async register({}, user) {
-    await axios.post('/api/v1/players/register/', user);
+  async register({dispatch}, user) {
+    let {data} = await axios.post('/api/v1/players/register/', user);
+    await dispatch('saveMe', data);
   },
   async login({dispatch}, user) {
     let {data} = await axios.post('/api/v1/players/login/', user);
     await dispatch('saveMe', data);
-
   },
   async saveMe({commit}, data) {
     await commit('setUser', data.token);
@@ -54,8 +55,10 @@ export default {
 function parseJwt (token) {
   var base64Url = token.split('.')[1];
   var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(window.atob(base64).split('').map(function(c) {
+  var jsonPayload = decodeURIComponent(window.atob(base64).split('')
+.map(function(c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
-  }).join(''));
+  })
+.join(''));
   return JSON.parse(jsonPayload);
 }

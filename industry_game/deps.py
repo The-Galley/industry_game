@@ -13,8 +13,10 @@ from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.jwt import (
     JwtAuthrorizationProvider,
     JwtProcessor,
+    parse_private_key,
 )
 from industry_game.utils.lobby.storage import LobbyStorage
+from industry_game.utils.rsa import stringify_public_key
 from industry_game.utils.security import Passgen
 from industry_game.utils.users.processor import PlayerProcessor
 from industry_game.utils.users.storage import PlayerStorage
@@ -60,9 +62,11 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
 
     @dependency
     def jwt_processor() -> JwtProcessor:
+        rsa_private_key = parse_private_key(args.private_key)
+        public_key = stringify_public_key(rsa_private_key.public_key())
         return JwtProcessor(
             private_key=args.private_key,
-            public_key=args.public_key,
+            public_key=public_key,
         )
 
     @dependency
