@@ -14,7 +14,7 @@ const getters = {
 
 const actions = {
   async register({dispatch}, user) {
-    let {data} = await axios.post('/api/v1/players/register/', user);
+    let {data} = await axios.post('https://industry-game.ru/api/v1/players/register/', user);
     await dispatch('saveMe', data);
   },
   async login({dispatch}, user) {
