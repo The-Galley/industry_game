@@ -1,13 +1,12 @@
 import { createRouter, createWebHistory } from 'vue-router';
 import AboutView from '../views/AboutView.vue';
 import HomeView from '../views/HomeView.vue';
-import LoginView from '../views/LoginView.vue';
-import RegisterView from '../views/RegisterView';
 import RegV from "@/views/RegV.vue";
 import StartPage from "@/views/StartPage.vue";
 import GameSelection from "@/views/GameSelection.vue";
 import GameDesc from "@/views/GameDesc.vue";
 import GameDescAdmin from "@/views/GameDescAdmin.vue";
+import LogV from "@/views/LogV.vue";
 
 const routes = [
   {
@@ -23,16 +22,11 @@ const routes = [
   {
     path: '/login',
     name: 'Login',
-    component: LoginView,
+    component: LogV,
   },
   {
     path: '/register',
     name: 'Register',
-    component: RegisterView,
-  },
-  {
-    path: '/gamereg',
-    name: 'RegV',
     component: RegV,
   },
   {

@@ -4,7 +4,7 @@
     <p class="byte">
       {'Name'}, скорее присоединяйся к игре
     </p>
-    <div class="d-flex  flex-wrap gap-3 justify-content-center">
+    <div :class="{'': true, 'game-selection_admin': userRole === 'ADMIN', 'game-selection_user': userRole === 'PLAYER' }">
       <GameCard />
       <GameCard />
       <GameCard />
@@ -18,9 +18,18 @@
 <script setup>
 import HeaderGame from "@/components/HeaderGame.vue";
 import GameCard from "@/components/GameCard.vue";
+
+let userRole = 'PLAYER';
 </script>
 
 <style scoped>
+.game-selection_user {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 2rem;
+  justify-content: center;
+}
+
  .byte {
    font-family: Roboto, Helvetica, Arial, sans-serif;
    text-align: left;

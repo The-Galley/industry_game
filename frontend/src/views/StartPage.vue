@@ -11,11 +11,10 @@
         приведи свой дистрикт к победе
       </p>
       <b-button class="starpage__button mt-4">
-        Войти в игру
-        <img
-          src="@/assets/Arrow.svg"
-          alt="arrow"
-        >
+        Войти
+      </b-button>
+      <b-button class="starpage__button mt-4">
+        Зарегистрироваться
       </b-button>
     </div>
   </div>
@@ -60,7 +59,7 @@
   background-color: #00D5FB;
   outline: none;
   border: none;
-  Width: 215px;
+  Width: 300px;
   Height: 56px;
   font-size: 24px;
   font-weight: 600;

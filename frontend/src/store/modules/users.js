@@ -5,6 +5,8 @@ const state = {
   user: null,
 };
 
+const url = 'https://industry-game.ru';
+
 const getters = {
   isAuthenticated: state => !!state.user,
   isAdmin: state => state?.user?.type === 'ADMIN',
@@ -14,11 +16,11 @@ const getters = {
 
 const actions = {
   async register({dispatch}, user) {
-    let {data} = await axios.post('https://industry-game.ru/api/v1/players/register/', user);
+    let {data} = await axios.post(url + '/api/v1/players/register/', user);
     await dispatch('saveMe', data);
   },
   async login({dispatch}, user) {
-    let {data} = await axios.post('/api/v1/players/login/', user);
+    let {data} = await axios.post(url + '/api/v1/players/login/', user);
     await dispatch('saveMe', data);
   },
   async saveMe({commit}, data) {
