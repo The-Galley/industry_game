@@ -1,5 +1,10 @@
 <script setup>
+import { defineProps } from 'vue';
 
+const props = defineProps({
+  name: String,
+  description: String
+});
 </script>
 
 <template>
@@ -14,11 +19,11 @@
     >
     <div class="p-2 w-100 d-flex flex-column align-items-start">
       <p class="card__description">
-        Всемирный фестиваль молодежи 2024
+        {{ props.description }}
       </p>
       <div class="d-flex justify-content-between w-100">
         <p class="card__name">
-          “ИНДУСТРИЯ 1.0”  - Золото современности
+          {{ props.name }}
         </p>
         <img
           src="@/assets/blackArrow.svg"

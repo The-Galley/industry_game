@@ -1,18 +1,14 @@
 <script setup>
- let userRole = 'Admin';
-import HeaderGame from "@/components/HeaderGame.vue";
+ let userRole = 'ADMIN';
 </script>
 
 <template>
-  <div class="gamedesc__header">
-    <HeaderGame />
-  </div>
-  <div :class="{'game-module': true, 'game-module_admin': userRole === 'Admin'}">
-    <div class="image_container">
+  <div :class="{'game-module': true, 'game-module_admin': userRole === 'ADMIN'}">
+    <div :class="{'image_container': true, 'image_container_admin': userRole === 'ADMIN'}">
       <img
         src="@/assets/CardImage.png"
         alt="Game avatar"
-        :class="{'gamedesc__image': true, 'gamedesc__image_admin': userRole === 'Admin'}"
+        :class="{'gamedesc__image': true, 'gamedesc__image_admin': userRole === 'ADMIN'}"
       >
     </div>
     <h2 class="gamedesc__title">
@@ -34,14 +30,11 @@ import HeaderGame from "@/components/HeaderGame.vue";
   display: flex;
   flex-direction: column;
   align-items: center;
+  max-width: 650px;
 }
 
 .game-module_admin {
   align-items: flex-start;
-}
-
-.gamedesc__header {
-  margin: 30px 0;
 }
 
 .image_container {
@@ -57,16 +50,16 @@ import HeaderGame from "@/components/HeaderGame.vue";
 }
 
 .gamedesc__image_admin {
-  width: 640px;
+  max-width: 640px;
 }
 
 .gamedesc__title {
   font-family: Jura,sans-serif;
-  font-size: calc(1.4rem + 0.6vw);
+  font-size: calc(1.3rem + 0.4vw);
   font-weight: 700;
   line-height: 33px;
-  text-align: center;
-  margin: 25px 10px;
+  text-align: left;
+  margin: 25px 0 25px 10px;
 
 }
 
@@ -93,23 +86,21 @@ import HeaderGame from "@/components/HeaderGame.vue";
     width: 660px;
   }
 }
-@media screen and (max-width: 768px) {
+@media screen and (max-width: 800px) {
   .gamedesc__image {
     width: 460px;
   }
+
+  .image_container_admin {
+    height: 0;
+  }
+
+  .gamedesc__image_admin {
+    max-width: 0px;
+    height: 0;
+  }
 }
 @media screen and (max-width: 650px) {
-  .gamedesc {
-    background: url("@/assets/MainBackground.svg") no-repeat left top;
-    width: 100vw;
-    height: 100vh;
-    overflow-y: hidden;
-  }
-
-  .gamedesc__header {
-    display: none;
-  }
-
   .image_container {
     width: 100%;
   }

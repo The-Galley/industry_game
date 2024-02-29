@@ -7,6 +7,7 @@ import GameSelection from "@/views/GameSelection.vue";
 import GameDesc from "@/views/GameDesc.vue";
 import GameDescAdmin from "@/views/GameDescAdmin.vue";
 import LogV from "@/views/LogV.vue";
+import CreateGame from "@/views/CreateGame.vue";
 
 const routes = [
   {
@@ -48,6 +49,11 @@ const routes = [
     path: '/gamedescadmin',
     name: 'GameDescAdmin',
     component: GameDescAdmin,
+  },
+  {
+    path: '/creategame',
+    name: 'CreateGame',
+    component: CreateGame,
   }
 ];
 

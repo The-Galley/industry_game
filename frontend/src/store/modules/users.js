@@ -24,6 +24,7 @@ const actions = {
     await dispatch('saveMe', data);
   },
   async saveMe({commit}, data) {
+    document.cookie = `token=${data.token}; path=/;`;
     await commit('setUser', data.token);
   },
   async logOut({commit}) {

@@ -10,12 +10,18 @@
       <p class="description mt-4">
         приведи свой дистрикт к победе
       </p>
-      <b-button class="starpage__button mt-4">
+      <router-link
+        class="nav-link starpage__button mt-4"
+        to="/login"
+      >
         Войти
-      </b-button>
-      <b-button class="starpage__button mt-4">
+      </router-link>
+      <router-link
+        class="nav-link starpage__button mt-4"
+        to="/register"
+      >
         Зарегистрироваться
-      </b-button>
+      </router-link>
     </div>
   </div>
 </template>
@@ -57,6 +63,8 @@
   align-items: center;
   justify-content: space-around;
   background-color: #00D5FB;
+  color: white;
+  border-radius: 8px;
   outline: none;
   border: none;
   Width: 300px;
@@ -65,6 +73,12 @@
   font-weight: 600;
   line-height: 28px;
   text-align: left;
+  opacity: 1;
+  transition: opacity 0.2s ease-in 0s;
+}
+
+.starpage__button:hover {
+  opacity: 0.5;
 }
 
 </style>

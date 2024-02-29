@@ -1,9 +1,13 @@
 <script setup>
 
 import GameModule from "@/components/GameModule.vue";
+import HeaderGame from "@/components/HeaderGame.vue";
 </script>
 
 <template>
+  <div class="gamedesc__header">
+    <HeaderGame />
+  </div>
   <div class="w-100 d-flex flex-column align-items-center gamedesc">
     <div class="w-100 d-flex flex-column align-items-center">
       <GameModule />
@@ -23,6 +27,9 @@ import GameModule from "@/components/GameModule.vue";
 </template>
 
 <style scoped>
+.gamedesc__header {
+  margin: 30px 0;
+}
 
 .gamedesc__button {
   font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -58,22 +65,6 @@ import GameModule from "@/components/GameModule.vue";
     width: 100vw;
     height: 100vh;
     overflow-y: hidden;
-  }
-
-  .gamedesc__header {
-    display: none;
-  }
-
-  .image_container {
-    width: 100%;
-  }
-
-  .gamedesc__image {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    object-position: center;
-    border-radius: 0 0 8px 8px;
   }
 }
 

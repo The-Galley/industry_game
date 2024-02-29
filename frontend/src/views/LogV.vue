@@ -5,53 +5,58 @@
       <b-form
         class="w-100 d-flex flex-column gap-3 align-items-center"
         style="max-width: 420px"
-        @submit.stop.prevent
+        @submit.prevent="submit"
       >
         <p class="form__title">
-          Привет, давай знакомиться!
+          Привет, рады снова видеть!
         </p>
         <div class="w-100">
           <label
-            for="userName"
+            for="username"
             class="form__label"
           >ФИО</label>
           <b-form-input
-            id="userName"
-            v-model="form.userName"
+            id="username"
+            v-model="form.username"
             class="form__input"
-            :state="userNameValidation"
+            :state="usernameValidation"
             placeholder="Введите свое имя"
           />
           <b-form-invalid-feedback
-            :state="userNameValidation"
+            :state="usernameValidation"
           >
             Это поле не должно быть пустым.
           </b-form-invalid-feedback>
         </div>
         <div class="w-100">
           <label
-            for="userPassword"
+            for="password"
             class="form__label"
           >Пароль</label>
           <b-form-input
-            id="userPassword"
-            v-model="form.userPassword"
+            id="password"
+            v-model="form.password"
             class="form__input"
-            :state="userPasswordValidation"
+            :state="passwordValidation"
             placeholder="Придумайте пароль"
           />
-          <b-form-invalid-feedback :state="userPasswordValidation">
+          <b-form-invalid-feedback :state="passwordValidation">
             Пароль должен содержать не менее 8 символов.
           </b-form-invalid-feedback>
         </div>
-        <div class="d-flex justify-content-end mt-2 w-100">
+        <div class="d-flex flex-column align-items-center justify-content-center w-100">
+          <div
+            v-if="hasError"
+            class="error-message"
+          >
+            {{ form_error }}
+          </div>
           <b-button
             class="reg__button"
             type="submit"
             :disabled="!isFormValid"
-            @click="handleSubmit"
           >
-            Готово
+            Войти
           </b-button>
         </div>
       </b-form>
@@ -61,53 +66,55 @@
 
 <script>
 import HeaderGame from "@/components/HeaderGame.vue";
+import {mapActions} from "vuex";
 
 export default {
   components: {HeaderGame},
   data() {
     return {
       form: {
-        userName: '',
-        userTelegramm: '',
-        userNickname: '',
-        userPassword: '',
+        username: '',
+        password: '',
       },
+      hasError: false,
+      form_error: ''
     };
   },
   computed: {
-    userNameValidation() {
-      return this.form.userName.length > 1;
+    usernameValidation() {
+      return this.form.username.length > 1;
     },
-    userTelegrammValidation() {
-      return this.form.userTelegramm?.length > 5;
-    },
-    userNicknameValidation() {
-      return this.form.userNickname?.length > 5;
-    },
-    userPasswordValidation() {
-      return this.form.userPassword?.length > 8;
+    passwordValidation() {
+      return this.form.password?.length > 7;
     },
     isFormValid() {
-      // Check if all fields are valid
       return (
-          this.userNameValidation &&
-          this.userTelegrammValidation &&
-          this.userNicknameValidation &&
-          this.userPasswordValidation
+          this.usernameValidation &&
+          this.passwordValidation
       );
     },
   },
   methods: {
-    handleSubmit() {
-      console.log(
-          this.form
-      );
-      // Add logic to handle form submission
-      // Reset form fields if needed
-      this.form.userTelegramm = '';
-      this.form.userName = '';
-      this.form.userNickname = '';
-      this.form.userPassword = '';
+    ...mapActions(['login']),
+    async submit() {
+      try {
+        console.log(this.form);
+        await this.login(this.form);
+        this.$router.push('/selectgame');
+
+      } catch (error) {
+        if (error.response.status === 404) {
+          this.hasError = "block";
+          this.form_error = "Пользователь с таким именем пользователя и паролем не найден";
+        } else if (error.response.status === 409) {
+          this.hasError = "block";
+          this.form_error = "Вы уже вошли в систему";
+        } else {
+          console.error("Произошла ошибка:", error.response);
+          this.hasError = "block";
+          this.form_error = "Произошла ошибка. Пожалуйста, попробуйте еще раз.";
+        }
+      }
     },
   },
 };
@@ -115,6 +122,11 @@ export default {
 
 
 <style scoped>
+.error-message {
+  color: red;
+  margin: 0 0 10px;
+  text-align: center;
+}
 .reg {
   color: #454862;
   font-family: Roboto, Helvetica, Arial, sans-serif;
@@ -154,6 +166,7 @@ export default {
   justify-content: space-around;
   background-color: #00D5FB;
   outline: none;
+  width: 170px;
   border: none;
   font-size: 18px;
   font-weight: 600;
