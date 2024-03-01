@@ -12,10 +12,10 @@ services:
 
   rest:
     restart: on-failure
-    # image: andytakker/industry-game-rest:latest
-    build:
-      dockerfile: ./docker/rest.dockerfile
-      context: .
+    image: andytakker/industry-game-rest:latest
+    # build:
+    #   dockerfile: ./docker/rest.dockerfile
+    #   context: .
     entrypoint: python -m industry_game
     environment:
       APP_API_ADDRESS: 0.0.0.0
@@ -34,12 +34,12 @@ services:
 
   frontend:
     restart: on-failure
-    # image: andytakker/industry-game-frontend:latest
-    build:
-      dockerfile: ./docker/frontend.dockerfile
-      context: .
-      args:
-        BASE_URL: https://vk.com
+    image: andytakker/industry-game-frontend:latest
+    # build:
+    #   dockerfile: ./docker/frontend.dockerfile
+    #   context: .
+    #   args:
+    #     BASE_URL: https://vk.com
     ports:
       - 80:80
       - 443:443
