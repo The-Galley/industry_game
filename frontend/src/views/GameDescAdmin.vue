@@ -9,7 +9,7 @@ import HeaderGame from "@/components/HeaderGame.vue";
     <div class="gamedesc__header">
       <HeaderGame />
     </div>
-    <div class="w-100 d-flex align-items-center gamedesc__container">
+    <div class="w-100 d-flex gamedesc__container">
       <div class="d-flex flex-column align-items-start">
         <GameModule />
         <div class="d-flex mt-4">
@@ -51,6 +51,7 @@ import HeaderGame from "@/components/HeaderGame.vue";
   font-family: Roboto, Helvetica, Arial, sans-serif;
   display: flex;
   flex-direction: column;
+  align-items: center;
   justify-content: space-between;
   color: #454862;
   margin: 0 15px;
@@ -114,6 +115,7 @@ import HeaderGame from "@/components/HeaderGame.vue";
   font-size: 14px;
   font-weight: 400;
   color: #8A8A8A;
+  margin: 0;
 }
 
 @media screen and (max-width: 900px) {

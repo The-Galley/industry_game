@@ -1,5 +1,5 @@
 <template>
-  <div class="w-100 d-flex flex-column align-items-center">
+  <div class="w-100 d-flex flex-column align-items-center mt-5">
     <p class="header-game__metagame">
       мета игра
     </p>

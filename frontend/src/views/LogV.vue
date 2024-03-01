@@ -58,6 +58,12 @@
           >
             Войти
           </b-button>
+          <router-link
+            class="nav-link mt-2 text-decoration-underline"
+            to="/register"
+          >
+            Зарегистрироваться
+          </router-link>
         </div>
       </b-form>
     </div>
@@ -134,7 +140,6 @@ export default {
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: url("@/assets/MainBackground.svg") no-repeat center;
   width: 100vw;
   height: 100vh;
   overflow-x: hidden;

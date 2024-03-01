@@ -1,5 +1,5 @@
 <template>
-  <div class="overflow-hidden d-flex mx-3">
+  <div class="overflow-hidden d-flex">
     <div class="StartPage">
       <p class="metagame">
         мета игра
@@ -37,10 +37,8 @@
   flex-direction: column;
   justify-content: center;
   align-items: center;
-  background: url("@/assets/MainBackground.svg") no-repeat center;
   width: 100vw;
   height: 100vh;
-  overflow-x: hidden;
 }
 .metagame {
   font-size: calc(1.025rem + 1.5vw);

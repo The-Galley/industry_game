@@ -61,10 +61,7 @@ import HeaderGame from "@/components/HeaderGame.vue";
 
 @media screen and (max-width: 650px) {
   .gamedesc {
-    background: url("@/assets/MainBackground.svg") no-repeat left top;
-    width: 100vw;
-    height: 100vh;
-    overflow-y: hidden;
+    overflow-x: hidden;
   }
 }
 
