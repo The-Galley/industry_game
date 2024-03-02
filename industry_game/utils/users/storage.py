@@ -53,10 +53,7 @@ class PlayerStorage(AbstractStorage):
         session: AsyncSession,
         username: str,
     ) -> FullUser | None:
-        stmt = select(UserDb).where(
-            UserDb.type == UserType.PLAYER,
-            UserDb.username == username,
-        )
+        stmt = select(UserDb).where(UserDb.username == username)
         obj = (await session.scalars(stmt)).first()
         return FullUser.from_model(obj) if obj else None
 
