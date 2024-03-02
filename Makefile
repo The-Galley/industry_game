@@ -31,7 +31,7 @@ lint-ci: lint-py lint-js ##@Linting Run all linters in CI
 lint-py: flake ruff bandit mypy  ##@Linting Run all python linters in CI
 
 lint-js: ##@Linting Run JS linter in CI
-	cd ./industry_game/static && yarn lint --no-fix
+	cd ./frontend && yarn lint --no-fix
 
 flake: ##@Linting Run flake8
 	.venv/bin/flake8 --max-line-length 88 --format=default $(PROJECT_PATH) 2>&1 | tee flake8.txt

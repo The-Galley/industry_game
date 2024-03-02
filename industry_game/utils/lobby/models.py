@@ -2,6 +2,7 @@ import msgspec
 
 from industry_game.db.models import UserGameLobby as UserGameLobbyDb
 from industry_game.utils.pagination import MetaPagination
+from industry_game.utils.users.models import ShortUser
 
 
 class Lobby(msgspec.Struct, frozen=True):
@@ -18,4 +19,4 @@ class Lobby(msgspec.Struct, frozen=True):
 
 class LobbyPagination(msgspec.Struct, frozen=True):
     meta: MetaPagination
-    items: list[Lobby]
+    items: list[ShortUser]

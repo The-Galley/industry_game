@@ -13,7 +13,12 @@ class Timer:
     _end_time: float | None
     _task: asyncio.Task | None
 
-    def __init__(self, coroutine: Awaitable, seconds: float, speed: float = 1) -> None:
+    def __init__(
+        self,
+        coroutine: Awaitable,
+        seconds: float,
+        speed: float = 1,
+    ) -> None:
         self._coroutine = coroutine
         self._seconds = seconds
         self._re_seconds = seconds

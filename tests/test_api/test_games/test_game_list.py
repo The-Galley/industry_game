@@ -11,7 +11,7 @@ from tests.utils.datetime import format_tz
 API_URL = URL("/api/v1/games/")
 
 
-async def test_games_list_unauthorized(api_client: TestClient) -> None:
+async def test_games_list_unauthorized(api_client: TestClient):
     response = await api_client.get(API_URL)
     assert response.status == HTTPStatus.UNAUTHORIZED
 
@@ -19,7 +19,7 @@ async def test_games_list_unauthorized(api_client: TestClient) -> None:
 async def test_games_list_players_status_ok(
     api_client: TestClient,
     player_headers: Mapping[str, str],
-) -> None:
+):
     response = await api_client.get(API_URL, headers=player_headers)
     assert response.status == HTTPStatus.OK
 

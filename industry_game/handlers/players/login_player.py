@@ -37,4 +37,4 @@ class LoginPlayerHandler(View, DependenciesMixin, AuthMixin):
         try:
             return AuthUserModel.model_validate_json(body)
         except ValidationError:
-            raise HTTPBadRequest
+            raise HTTPBadRequest(reason="Incorrect user auth data")
