@@ -74,7 +74,7 @@ class GameStorage(AbstractStorage):
         session: AsyncSession,
         name: str,
         description: str,
-        created_by: int,
+        created_by_id: int,
         commit: bool = True,
     ) -> Game:
         stmt = (
@@ -82,7 +82,7 @@ class GameStorage(AbstractStorage):
             .values(
                 name=name,
                 description=description,
-                created_by=created_by,
+                created_by_id=created_by_id,
             )
             .returning(GameDb)
         )
