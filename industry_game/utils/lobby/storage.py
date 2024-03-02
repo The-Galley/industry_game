@@ -3,10 +3,12 @@ import asyncio
 from sqlalchemy import delete, func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
 
+from industry_game.db.models import User as UserDb
 from industry_game.db.models import UserGameLobby as UserGameLobbyDb
 from industry_game.utils.db import AbstractStorage, inject_session
 from industry_game.utils.lobby.models import Lobby, LobbyPagination
 from industry_game.utils.pagination import MetaPagination
+from industry_game.utils.users.models import ShortUser
 
 
 class LobbyStorage(AbstractStorage):
@@ -80,16 +82,17 @@ class LobbyStorage(AbstractStorage):
     @inject_session
     async def get_items(
         self, session: AsyncSession, game_id: int, page: int, page_size: int
-    ) -> list[Lobby]:
+    ) -> list[ShortUser]:
         query = (
-            select(UserGameLobbyDb)
+            select(UserDb)
+            .join(UserGameLobbyDb, UserDb.id == UserGameLobbyDb.user_id)
             .where(UserGameLobbyDb.game_id == game_id)
             .limit(page_size)
             .offset((page - 1) * page_size)
         )
 
         games = await session.scalars(query)
-        items: list[Lobby] = []
+        items: list[ShortUser] = []
         for game in games:
-            items.append(Lobby.from_model(game))
+            items.append(ShortUser.from_model(game))
         return items

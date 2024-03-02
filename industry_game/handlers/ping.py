@@ -1,4 +1,3 @@
-import asyncio
 import logging
 from http import HTTPStatus
 
@@ -17,7 +16,7 @@ class PingHandler(View, DependenciesMixin):
     async def get(self) -> Response:
         try:
             db = await self._ping()
-        except asyncio.TimeoutError:
+        except TimeoutError:
             db = False
         deps = {
             "db": db,

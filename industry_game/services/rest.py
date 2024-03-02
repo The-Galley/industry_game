@@ -11,7 +11,9 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from yarl import URL
 
 from industry_game.handlers.games.create_game import CreateGameHandler
-from industry_game.handlers.games.list_game import ListGameHandler
+from industry_game.handlers.games.game_details import GameDetailsHandler
+from industry_game.handlers.games.game_list import ListGameHandler
+from industry_game.handlers.games.game_update import UpdateGameHandler
 from industry_game.handlers.games.lobby.add_user_to_lobby import (
     AddUserToGameLobbyHandler,
 )
@@ -22,8 +24,6 @@ from industry_game.handlers.games.lobby.list_lobby import ListGameLobbyHandler
 from industry_game.handlers.games.lobby.read_lobby import (
     ReadGameUserLobbyHandler,
 )
-from industry_game.handlers.games.read_by_id_game import ReadByIdGameHandler
-from industry_game.handlers.games.update_game import UpdateGameHandler
 from industry_game.handlers.ping import PingHandler
 from industry_game.handlers.players.list_player import ListPlayerHandler
 from industry_game.handlers.players.login_player import LoginPlayerHandler
@@ -83,7 +83,7 @@ class REST(AIOHTTPService):
         # game handlers
         (hdrs.METH_GET, "/api/v1/games/", ListGameHandler),
         (hdrs.METH_POST, "/api/v1/games/", CreateGameHandler),
-        (hdrs.METH_GET, "/api/v1/games/{game_id}/", ReadByIdGameHandler),
+        (hdrs.METH_GET, "/api/v1/games/{game_id}/", GameDetailsHandler),
         (hdrs.METH_POST, "/api/v1/games/{game_id}/", UpdateGameHandler),
         # lobby handlers
         (hdrs.METH_GET, "/api/v1/games/{game_id}/lobby/", ListGameLobbyHandler),

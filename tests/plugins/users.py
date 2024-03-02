@@ -15,6 +15,7 @@ def player_storage(
 ) -> PlayerStorage:
     return PlayerStorage(session_factory=session_factory)
 
+
 @pytest.fixture
 def player_processor(
     player_storage: PlayerStorage,
@@ -26,6 +27,7 @@ def player_processor(
         passgen=passgen,
         authorization_provider=authorization_provider,
     )
+
 
 @pytest.fixture
 def admin() -> AuthUser:

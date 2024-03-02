@@ -2,13 +2,13 @@ from aiohttp.web import View
 from aiohttp.web_exceptions import HTTPNotFound
 from aiohttp.web_response import Response
 
-from industry_game.utils.http.auth.base import require_authorization
+from industry_game.utils.http.auth.base import AuthMixin, require_authorization
 from industry_game.utils.http.deps import DependenciesMixin
 from industry_game.utils.http.params import parse_path_param
 from industry_game.utils.http.response import msgspec_json_response
 
 
-class ReadByIdGameHandler(View, DependenciesMixin):
+class GameDetailsHandler(View, DependenciesMixin, AuthMixin):
     @require_authorization
     async def get(self) -> Response:
         game_id = parse_path_param(self.request, "game_id", int)
