@@ -12,7 +12,7 @@ services:
 
   rest:
     restart: on-failure
-    image: andytakker/industry-game-rest:latest
+    # image: andytakker/industry-game-rest:latest
     build:
       dockerfile: ./docker/rest.dockerfile
       context: .
@@ -34,7 +34,7 @@ services:
 
   frontend:
     restart: on-failure
-    image: andytakker/industry-game-frontend:latest
+    # image: andytakker/industry-game-frontend:latest
     build:
       dockerfile: ./docker/frontend.dockerfile
       context: .
