@@ -28,6 +28,10 @@ class PlayerProcessor:
         user = await self.player_storage.create(
             username=player.username,
             password_hash=self.passgen.hashpw(player.password),
+            properties={
+                "telegram": player.telegram,
+                "name": player.name,
+            },
         )
         token = self.authorization_provider.generate_token(user=user)
         return AuthToken(token=token)

@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Mapping
 
 from sqlalchemy import func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -18,6 +19,7 @@ class PlayerStorage(AbstractStorage):
         *,
         username: str,
         password_hash: str,
+        properties: Mapping[str, str],
         commit: bool = True,
     ) -> FullUser:
         stmt = (
@@ -25,6 +27,7 @@ class PlayerStorage(AbstractStorage):
             .values(
                 username=username,
                 password_hash=password_hash,
+                properties=properties,
             )
             .returning(UserDb)
         )
@@ -50,10 +53,7 @@ class PlayerStorage(AbstractStorage):
         session: AsyncSession,
         username: str,
     ) -> FullUser | None:
-        stmt = select(UserDb).where(
-            UserDb.type == UserType.PLAYER,
-            UserDb.username == username,
-        )
+        stmt = select(UserDb).where(UserDb.username == username)
         obj = (await session.scalars(stmt)).first()
         return FullUser.from_model(obj) if obj else None
 

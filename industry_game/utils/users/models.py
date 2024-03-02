@@ -29,6 +29,8 @@ class FullUser(CustomStruct, frozen=True):
     id: int
     type: UserType
     username: str
+    telegram: str
+    name: str
 
     @classmethod
     def from_model(self, obj: UserDb) -> "FullUser":
@@ -36,4 +38,6 @@ class FullUser(CustomStruct, frozen=True):
             id=obj.id,
             type=obj.type,
             username=obj.username,
+            telegram=obj.properties.get("telegram", ""),
+            name=obj.properties.get("name", ""),
         )

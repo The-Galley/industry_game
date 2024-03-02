@@ -1,6 +1,6 @@
 from enum import StrEnum
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel, ConfigDict, Field
 
 from industry_game.utils.msgspec import CustomStruct
 
@@ -11,8 +11,10 @@ class UserType(StrEnum):
 
 
 class RegisterPlayerModel(BaseModel):
-    username: str
-    password: str
+    username: str = Field(min_length=8)
+    password: str = Field(min_length=8)
+    telegram: str = Field(min_length=2)
+    name: str = Field(min_length=5)
 
 
 class AuthUserModel(BaseModel):
