@@ -1,3 +1,5 @@
+from enum import StrEnum, unique
+
 import msgspec
 
 from industry_game.db.models import UserGameLobby as UserGameLobbyDb
@@ -20,3 +22,13 @@ class Lobby(msgspec.Struct, frozen=True):
 class LobbyPagination(msgspec.Struct, frozen=True):
     meta: MetaPagination
     items: list[ShortUser]
+
+
+@unique
+class LobbyStatusType(StrEnum):
+    CHECKED_IN = "CHECKED_IN"
+    NOT_CHECKED_IN = "NOT_CHECKED_IN"
+
+
+class LobbyStatus(msgspec.Struct, frozen=True):
+    status: StrEnum
