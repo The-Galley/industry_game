@@ -1,42 +1,30 @@
 <script setup>
-import GameModule from "@/components/GameModule.vue";
 import HeaderGame from "@/components/HeaderGame.vue";
-import {onMounted, ref} from "vue";
-import {actions} from "@/store/modules/games";
+import GameDescPlayer from "@/components/GameDescPlayer.vue";
+import GameDescAdmin from "@/components/GameDescAdmin.vue";
+import { useStore } from 'vuex';
 import { useRouter } from 'vue-router';
 
+
+const store = useStore();
+const { isAdmin, isPlayer } = store.getters;
 const router = useRouter();
-const gameId = ref(null);
-gameId.value = router.currentRoute.value.params.gameId;
-onMounted(async () => {
-  try {
-    const response = await actions.getGameById(gameId.value);
-    console.log(response);
-  } catch (error) {
-    console.error('Ошибка при получении списка игр:', error);
-  }
-});
+const gameId = router.currentRoute.value.params.gameId;
 </script>
 
 <template>
-  <div class="gamedesc__header">
-    <HeaderGame />
-  </div>
-  <div class="w-100 d-flex flex-column align-items-center gamedesc">
-    <div class="w-100 d-flex flex-column align-items-center">
-      <GameModule />
-      <b-button class="gamedesc__button mt-5">
-        Присоединиться к игре
-      </b-button>
-      <div class="d-flex flex-column">
-        <p class="gamedesc__wait">
-          gigachad99,  игра скоро начнется
-        </p>
-        <b-button class="gamedesc__button gamedesc__button_leave">
-          Отказаться от участия
-        </b-button>
-      </div>
+  <div class="d-flex flex-column">
+    <div class="gamedesc__header">
+      <HeaderGame />
     </div>
+    <GameDescPlayer
+      v-if="isPlayer"
+      :gameid="gameId"
+    />
+    <GameDescAdmin
+      v-if="isAdmin"
+      :gameid="gameId"
+    />
   </div>
 </template>
 
@@ -44,39 +32,9 @@ onMounted(async () => {
 .gamedesc__header {
   margin: 30px 0;
 }
-
-.gamedesc__button {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  display: flex;
-  align-items: center;
-  justify-content: space-around;
-  background-color: #00D5FB;
-  outline: none;
-  border: none;
-  font-size: 18px;
-  padding: 14px 21px;
-  font-weight: 600;
-  line-height: 28px;
-  text-align: left;
-}
-
-.gamedesc__button_leave {
-  background-color: #CCCDCF;
-  margin-top: 150px;
-}
-
-.gamedesc__wait {
-  font-family: Roboto, Helvetica, Arial, sans-serif;
-  text-align: left;
-  color: #00D5FB;
-  font-size: 16px;
-  font-weight: 400;
-}
-
-@media screen and (max-width: 650px) {
-  .gamedesc {
-    overflow-x: hidden;
+@media screen and (max-width: 900px) {
+  .gamedesc__header {
+    display: none;
   }
 }
-
 </style>

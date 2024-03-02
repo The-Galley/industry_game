@@ -1,26 +1,47 @@
+<script setup>
+import { useStore } from 'vuex';
+const store = useStore();
+const { isAdmin, isPlayer } = store.getters;
+</script>
+
 <script>
-import {mapActions} from "vuex";
+import {actions} from "@/store/modules/games";
+
 export default {
+  props: {
+    Id: String
+  },
+
     data() {
       return {
         form: {
-          name: "“ИНДУСТРИЯ 1.0”  - Золото современности",
-          description: "Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры Описание игры",
+          name: '',
+          description: '',
         },
         editing: false
       };
     },
+  mounted() {
+    try {
+      actions.getGameById(this.Id)
+          .then(response => {
+            this.form.name = response.data.name;
+            this.form.description = response.data.description;
+          });
+    } catch (error) {
+      console.error('Ошибка при получении списка игр:', error);
+    }},
     methods: {
       toggleEdit() {
         this.editing = !this.editing;
       },
-      ...mapActions(['updateGameById']),
       async submit() {
         console.log(this.form);
         this.toggleEdit();
         try {
-          console.log(this.form);
-          await this.updateGameById(this.form);
+          console.log(this.form,);
+          const response = await actions.updateGameById(this.form, Number(this.Id));
+          console.log(response);
         } catch (error) {
           console.error("Произошла ошибка:", error.response);
           this.hasError = "block";
@@ -31,37 +52,41 @@ export default {
   };
 </script>
 
-<script setup>
-let userRole = 'ADMIN';
-</script>
+
 
 <template>
-  <div :class="{'game-module': true, 'game-module_admin': userRole === 'ADMIN'}">
-    <div :class="{'image_container': true, 'image_container_admin': userRole === 'ADMIN'}">
+  <div :class="{'game-module': true, 'game-module_admin': isAdmin}">
+    <div :class="{'image_container': true, 'image_container_admin': isAdmin}">
       <img
         src="@/assets/CardImage.png"
         alt="Game avatar"
-        :class="{'gamedesc__image': true, 'gamedesc__image_admin': userRole === 'ADMIN'}"
+        :class="{'gamedesc__image': true, 'gamedesc__image_admin': isAdmin}"
       >
     </div>
     <b-form
-      :class="{'w-100 d-flex flex-column gap-3': true, 'align-items-start': userRole === 'ADMIN', 'align-items-center': userRole === 'PLAYER'}"
+      :class="{'w-100 d-flex flex-column gap-3 mt-4': true, 'align-items-start': isAdmin, 'align-items-center': isPlayer}"
       @submit.prevent="submit"
     >
-      <button
-        v-if="!editing"
-        class="game-module__submit"
-        @click="toggleEdit"
+      <div
+        v-if="isAdmin"
+        class="w-100 d-flex align-items-end"
       >
-        Редактировать
-      </button>
-      <button
-        v-if="editing"
-        type="submit"
-        class="game-module__submit"
-      >
-        Сохранить
-      </button>
+        <button
+          v-if="!editing"
+          class="game-module__submit"
+          @click="toggleEdit"
+        >
+          Редактировать
+        </button>
+        <button
+          v-if="editing"
+          type="submit"
+          class="game-module__submit"
+        >
+          Сохранить
+        </button>
+      </div>
+      <!--      :model-value="gameName.name"-->
       <div class="w-100">
         <b-form-textarea
           id="name"
@@ -72,16 +97,19 @@ let userRole = 'ADMIN';
           no-resize
         />
       </div>
-      <p class="gamedesc__event">
-        Всемирный фестиваль молодежи 2024
-      </p>
-      <div class="w-100">
+      <!--      :model-value="gameName.description"-->
+      <div
+        class="w-100 "
+        fluid
+      >
         <b-form-textarea
           id="description"
           v-model="form.description"
-          class="game-module__text-input"
+          class="game-module__text-input gamedesc__event"
           placeholder="Описание игры"
-          rows="5"
+          rows="3"
+          max-rows="8"
+          wrap="soft"
           no-resize
           :plaintext="!editing"
         />
@@ -143,12 +171,12 @@ let userRole = 'ADMIN';
   font-weight: 700;
   line-height: 33px;
   text-align: left;
-  margin: 0 0 25px 10px;
+  margin: 0 0 0 10px;
 }
 
 .gamedesc__event {
   font-family: Roboto, Helvetica, Arial, sans-serif;
-  font-size: 16px;
+  font-size: 18px;
   font-weight: 400;
   line-height: 19px;
   text-align: center;
@@ -157,11 +185,11 @@ let userRole = 'ADMIN';
 }
 
 .game-module__text-input {
-  min-height: 180px;
+  min-height: 130px;
   width: 100%;
   border: none;
   font-family: Roboto, Helvetica, Arial, sans-serif;
-  font-size: 14px;
+  font-size: 18px;
   font-weight: 400;
   max-width: 620px;
   line-height: 25px;
@@ -173,6 +201,11 @@ let userRole = 'ADMIN';
 @media screen and (max-width: 990px) {
   .gamedesc__image {
     width: 660px;
+  }
+}
+@media screen and (max-width: 900px) {
+  .game-module__submit {
+    margin: 0 0 0 10px;
   }
 }
 @media screen and (max-width: 800px) {
@@ -199,7 +232,7 @@ let userRole = 'ADMIN';
     height: 100%;
     object-fit: cover;
     object-position: center;
-    border-radius: 0 0 8px 8px;
+    border-radius: 8px;
   }
 }
 </style>

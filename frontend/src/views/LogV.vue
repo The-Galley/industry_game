@@ -19,11 +19,11 @@
             id="username"
             v-model="form.username"
             class="form__input"
-            :state="usernameValidation"
+            :state="usernameValidation || !formSubmitted ? null : false"
             placeholder="Введите свое имя"
           />
           <b-form-invalid-feedback
-            :state="usernameValidation"
+            :state="usernameValidation || !formSubmitted ? null : false"
           >
             Это поле не должно быть пустым.
           </b-form-invalid-feedback>
@@ -38,10 +38,10 @@
             v-model="form.password"
             type="password"
             class="form__input"
-            :state="passwordValidation"
+            :state="passwordValidation || !formSubmitted ? null : false"
             placeholder="Придумайте пароль"
           />
-          <b-form-invalid-feedback :state="passwordValidation">
+          <b-form-invalid-feedback :state="passwordValidation || !formSubmitted ? null : false">
             Пароль должен содержать не менее 8 символов.
           </b-form-invalid-feedback>
         </div>
@@ -55,7 +55,6 @@
           <b-button
             class="reg__button"
             type="submit"
-            :disabled="!isFormValid"
           >
             Войти
           </b-button>
@@ -84,7 +83,8 @@ export default {
         password: '',
       },
       hasError: false,
-      form_error: ''
+      form_error: '',
+      formSubmitted: false
     };
   },
   computed: {
@@ -105,9 +105,12 @@ export default {
     ...mapActions(['login']),
     async submit() {
       try {
+        if(!this.isFormValid) {
+          return;
+        }
         console.log(this.form);
         await this.login(this.form);
-        this.$router.push('/selectgame');
+        this.$router.push('/games');
 
       } catch (error) {
         if (error.response.status === 404) {
@@ -121,6 +124,8 @@ export default {
           this.hasError = "block";
           this.form_error = "Произошла ошибка. Пожалуйста, попробуйте еще раз.";
         }
+      } finally {
+        this.formSubmitted = true;
       }
     },
   },

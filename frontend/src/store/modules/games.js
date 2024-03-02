@@ -25,8 +25,8 @@ export const actions = {
             },
         });
     },
-    async createGame(gameData) {
-        return await axios.post(`${url}/api/v1/games/`, gameData, {
+    async createGame(form) {
+        return await axios.post(`${url}/api/v1/games/`, form, {
             headers: {
                 "Authorization": token
             }
@@ -53,8 +53,22 @@ export const actions = {
             }
         });
     },
+    async addUsersLobby(game_id) {
+        return await axios.post(`${url}/api/v1/games/${game_id}/lobby/`,  null,{
+            headers: {
+                "Authorization": token
+            }
+        });
+    },
     async getUserCheck(game_id) {
         return await axios.get(`${url}/api/v1/games/${game_id}/lobby/status/`,  {
+            headers: {
+                "Authorization": token
+            }
+        });
+    },
+    async deleteUserFromLobby(game_id) {
+        return await axios.delete(`${url}/api/v1/games/${game_id}/lobby/`,  {
             headers: {
                 "Authorization": token
             }

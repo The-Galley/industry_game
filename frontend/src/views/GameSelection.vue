@@ -1,10 +1,19 @@
 <template>
-  <div class="w-100 d-flex flex-column align-items-center game-selection">
+  <div
+    v-if="!state.loading"
+    class="w-100 d-flex flex-column align-items-center game-selection"
+  >
     <HeaderGame />
-    <p class="byte">
+    <p
+      v-if="isPlayer"
+      class="byte mx-4"
+    >
       {{ stateUser.username }}, скорее присоединяйся к игре
     </p>
-    <div v-if="stateUser.type === 'ADMIN'">
+    <div
+      v-if="isAdmin"
+      class="mb-5"
+    >
       <button
         class="create-game"
         @click="goToCreateGamePage"
@@ -12,7 +21,9 @@
         Создать игру
       </button>
     </div>
-    <div :class="{'d-flex flex-wrap gap-4 justify-content-center': true, 'game-selection_admin': stateUser.type === 'ADMIN', 'game-selection_user': stateUser.type === 'PLAYER' }">
+    <div
+      :class="{'d-flex flex-wrap gap-4 justify-content-center game-selection_user': true}"
+    >
       <GameCard
         v-for="(game, index) in games"
         :key="index"
@@ -22,18 +33,23 @@
       />
     </div>
   </div>
+  <Preloader v-else />
 </template>
 
 <script setup>
 import { actions } from "@/store/modules/games";
 import HeaderGame from "@/components/HeaderGame.vue";
 import GameCard from "@/components/GameCard.vue";
-import { ref, onMounted } from 'vue';
+import {ref, onMounted, reactive} from 'vue';
 import { useRouter } from "vue-router";
 import { useStore } from 'vuex';
+import Preloader from "@/components/PreloaderVue.vue";
 
+const state = reactive({
+  loading: true
+});
 const store = useStore();
-const { stateUser } = store.getters;
+const { stateUser, isAdmin, isPlayer } = store.getters;
 const router = useRouter();
 const goToCreateGamePage =() => {
   router.push('/creategame');
@@ -47,8 +63,11 @@ const goToGamePage = (gameId) => {
 
 onMounted(async () => {
   try {
-    const response = await actions.getGameList(1);
-    games.value = response.data.items;
+    await actions.getGameList(1).then((response) => {
+      state.loading = false;
+      games.value = response.data.items;
+    });
+
   } catch (error) {
     console.error('Ошибка при получении списка игр:', error);
   }
@@ -62,6 +81,7 @@ onMounted(async () => {
   display: flex;
   flex-wrap: wrap;
   gap: 2rem;
+  margin: 0 10px 25px 10px;
   justify-content: center;
 }
 
@@ -95,8 +115,6 @@ onMounted(async () => {
 @media screen and (max-width: 650px) {
   .game-selection {
     margin: 30px 0 30px;
-    background: url("@/assets/MainBackground.svg") repeat left top;
-    background-size: inherit;
     width: 100vw;
   }
 }

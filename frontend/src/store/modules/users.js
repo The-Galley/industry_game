@@ -19,7 +19,6 @@ const actions = {
     const token = getCookie('token');
       try {
         const userData = await getUserData(token);
-        console.log(userData.token);
         commit('setUser', userData);
       } catch (error) {
         console.error('Error checking authentication:', error);

@@ -67,7 +67,15 @@ const props = defineProps({
 }
 
 .card__description {
+  margin-top: 10px;
   font-family: Roboto, Helvetica, Arial, sans-serif;
+  max-width: 300px;
+  text-overflow: ellipsis;
+  white-space: pre-wrap;
+  display: -webkit-box;
+  -webkit-line-clamp: 3;
+  -webkit-box-orient: vertical;
+  overflow-y: hidden;
   color: #8A8A8A;
   font-size: 14px;
   font-weight: 400;

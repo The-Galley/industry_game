@@ -53,7 +53,6 @@ export default {
 #app {
   background: url("@/assets/MainBackground.svg") no-repeat center;
   background-size: cover;
-  width: 100vw;
   height: 100vh;
   font-family: Avenir, Helvetica, Arial, sans-serif;
   -webkit-font-smoothing: antialiased;
@@ -65,7 +64,8 @@ export default {
 }
 .main {
   max-width: 1500px;
-  //padding-top: 5em;
+  display: flex;
+  align-items: center;
   padding: 0;
   margin: 0;
 }
