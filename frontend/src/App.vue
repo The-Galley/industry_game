@@ -5,13 +5,20 @@
 </template>
 
 <script>
-// @ is an alias to /src
-// import NavBar from '@/components/NavBar.vue';
-// export default {
-//   components: {
-//     NavBar
-//   }
-// };
+import { mapActions } from 'vuex';
+
+export default {
+  name: 'App',
+  created() {
+    this.checkAuthentication();
+  },
+  methods: {
+    ...mapActions(['checkAuth']),
+    async checkAuthentication() {
+      await this.checkAuth();
+    }
+  }
+};
 </script>
 
 <style>

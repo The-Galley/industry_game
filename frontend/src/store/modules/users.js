@@ -15,6 +15,16 @@ const getters = {
 };
 
 const actions = {
+  async checkAuth({ commit }) {
+    const token = getCookie('token');
+      try {
+        const userData = await getUserData(token);
+        console.log(userData.token);
+        commit('setUser', userData);
+      } catch (error) {
+        console.error('Error checking authentication:', error);
+      }
+  },
   async register({dispatch}, user) {
     let {data} = await axios.post(url + '/api/v1/players/register/', user);
     await dispatch('saveMe', data);
@@ -34,19 +44,30 @@ const actions = {
 };
 
 const mutations = {
-  setUser(state, token) {
-    const parsedData = parseJwt(token);
-    state.user = {
-      token: token,
-      id: parsedData.id,
-      username: parsedData.username,
-      type: parsedData.type,
-    };
+  setUser(state, userData) {
+    state.user = userData;
   },
-  logout(state, user){
+  logout(state, user) {
     state.user = user;
   },
 };
+
+async function getUserData(token) {
+  const parsedData = parseJwt(token);
+  return {
+    token: token,
+    id: parsedData.id,
+    username: parsedData.username,
+    type: parsedData.type,
+  };
+}
+
+function getCookie(name) {
+  const value = `; ${document.cookie}`;
+  const parts = value.split(`; ${name}=`);
+  if (parts.length === 2) return parts.pop().split(';')
+.shift();
+}
 
 export default {
   state,
@@ -56,9 +77,9 @@ export default {
 };
 
 function parseJwt (token) {
-  var base64Url = token.split('.')[1];
-  var base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
-  var jsonPayload = decodeURIComponent(window.atob(base64).split('')
+  let base64Url = token.split('.')[1];
+  let base64 = base64Url.replace(/-/g, '+').replace(/_/g, '/');
+  let jsonPayload = decodeURIComponent(window.atob(base64).split('')
 .map(function(c) {
       return '%' + ('00' + c.charCodeAt(0).toString(16)).slice(-2);
   })

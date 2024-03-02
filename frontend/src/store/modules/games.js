@@ -53,6 +53,13 @@ export const actions = {
             }
         });
     },
+    async getUserCheck(game_id) {
+        return await axios.get(`${url}/api/v1/games/${game_id}/lobby/status/`,  {
+            headers: {
+                "Authorization": token
+            }
+        });
+    },
   };
 
 export default {actions};

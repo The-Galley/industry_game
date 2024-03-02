@@ -10,7 +10,6 @@ const props = defineProps({
 <template>
   <button
     class="card"
-    @click="console.log(1)"
   >
     <img
       src="@/assets/CardImage.png"

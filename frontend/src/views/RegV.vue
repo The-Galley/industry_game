@@ -69,6 +69,7 @@
             id="password"
             v-model="form.password"
             class="form__input"
+            type="password"
             :state="passwordValidation"
             placeholder="Придумайте пароль"
           />
@@ -94,7 +95,7 @@
             class="nav-link text-decoration-underline mt-2"
             to="/login"
           >
-            Уже зарегистророваны? Войти
+            Уже зарегистрированы? Войти
           </router-link>
         </div>
       </b-form>

@@ -1,7 +1,21 @@
 <script setup>
-
 import GameModule from "@/components/GameModule.vue";
 import HeaderGame from "@/components/HeaderGame.vue";
+import {onMounted, ref} from "vue";
+import {actions} from "@/store/modules/games";
+import { useRouter } from 'vue-router';
+
+const router = useRouter();
+const gameId = ref(null);
+gameId.value = router.currentRoute.value.params.gameId;
+onMounted(async () => {
+  try {
+    const response = await actions.getGameById(gameId.value);
+    console.log(response);
+  } catch (error) {
+    console.error('Ошибка при получении списка игр:', error);
+  }
+});
 </script>
 
 <template>

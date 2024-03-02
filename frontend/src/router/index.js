@@ -31,17 +31,17 @@ const routes = [
     component: StartPage,
   },
   {
-    path: '/selectgame',
+    path: '/games',
     name: 'SelectGame',
     component: GameSelection,
   },
   {
-    path: '/gamedesc',
+    path: `/games/:gameId`,
     name: 'GameDesc',
     component: GameDesc,
   },
   {
-    path: '/gamedescadmin',
+    path: `/games/admin/:gameId`,
     name: 'GameDescAdmin',
     component: GameDescAdmin,
   },

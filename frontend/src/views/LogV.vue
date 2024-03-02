@@ -14,7 +14,7 @@
           <label
             for="username"
             class="form__label"
-          >ФИО</label>
+          >Никнейм</label>
           <b-form-input
             id="username"
             v-model="form.username"
@@ -36,6 +36,7 @@
           <b-form-input
             id="password"
             v-model="form.password"
+            type="password"
             class="form__input"
             :state="passwordValidation"
             placeholder="Придумайте пароль"
