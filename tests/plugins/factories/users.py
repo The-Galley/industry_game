@@ -1,33 +1,41 @@
 from collections.abc import Callable
-from typing import Any
 
+import factory
 import pytest
-from polyfactory.factories.sqlalchemy_factory import SQLAlchemyFactory
 from sqlalchemy.ext.asyncio import AsyncSession
 
 from industry_game.db.models import User
 from industry_game.utils.security import Passgen
+from industry_game.utils.users.base import UserType
 
 
-def empty_properties() -> dict[str, Any]:
-    return dict()
+class UserPropertiesFactory(factory.Factory):
+    class Meta:
+        model = dict
+
+    name = "First Last Name"
+    telegram = "@tg_username"
 
 
-class UserFactory(SQLAlchemyFactory[User]):
-    __set_primary_key__ = False
+class UserFactory(factory.Factory):
+    class Meta:
+        model = User
 
-    properties = empty_properties
+    id = factory.Sequence(lambda n: n + 1)
+    username = "username"
+    type = UserType.PLAYER
+    password_hash = ""
+    properties = factory.SubFactory(UserPropertiesFactory)
 
 
 @pytest.fixture
 def create_user(session: AsyncSession, passgen: Passgen) -> Callable:
     async def factory(**kwargs) -> User:
-        password = "secret"
+        password = kwargs.get("password", "secret00")
         if "password" in kwargs:
-            password = kwargs["password"]
             del kwargs["password"]
-        password_hash = passgen.hashpw(password)
-        user = UserFactory.build(**kwargs, password_hash=password_hash)
+        kwargs["password_hash"] = passgen.hashpw(password)
+        user = UserFactory(**kwargs)
         session.add(user)
         await session.commit()
         await session.flush(user)

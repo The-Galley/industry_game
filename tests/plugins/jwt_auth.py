@@ -1,6 +1,9 @@
+from collections.abc import Callable
+
 import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
+from industry_game.db.models import User
 from industry_game.utils.http.auth.jwt import (
     JwtAuthrorizationProvider,
     JwtProcessor,
@@ -52,3 +55,17 @@ def admin_token(admin: AuthUser, jwt_processor: JwtProcessor) -> str:
 @pytest.fixture
 def player_token(player: AuthUser, jwt_processor: JwtProcessor) -> str:
     return jwt_processor.encode(player.to_dict())
+
+
+@pytest.fixture
+def token_from_user(jwt_processor: JwtProcessor) -> Callable:
+    def _factory(user: User) -> str:
+        return jwt_processor.encode(
+            {
+                "id": user.id,
+                "username": user.username,
+                "type": user.type,
+            }
+        )
+
+    return _factory

@@ -1,4 +1,3 @@
-from argparse import Namespace
 from collections.abc import AsyncIterator, Mapping, Sequence
 
 import pytest

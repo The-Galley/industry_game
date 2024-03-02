@@ -46,7 +46,7 @@ jobs:
           tags: |
             andytakker/industry-game-rest:latest
             andytakker/vk-parser:${{ steps.vars.outputs.sha_short }}
-      
+
       - name: Build and push frontend image
         uses: docker/build-push-action@v5
         with:

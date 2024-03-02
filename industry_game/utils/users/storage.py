@@ -65,7 +65,6 @@ class PlayerStorage(AbstractStorage):
         password_hash: str,
     ) -> FullUser | None:
         stmt = select(UserDb).where(
-            UserDb.type == UserType.PLAYER,
             UserDb.username == username,
             UserDb.password_hash == password_hash,
         )
