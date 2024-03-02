@@ -21,6 +21,6 @@ class CreateGameHandler(View, DependenciesMixin, AuthMixin):
         game = await self.game_storage.create(
             name=new_game_data.name,
             description=new_game_data.description,
-            created_by=self.user.id,
+            created_by_id=self.user.id,
         )
         return msgspec_json_response(game, status=HTTPStatus.CREATED)
