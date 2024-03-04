@@ -1,7 +1,7 @@
 <template>
   <section>
     <form
-      lass="needs-validation"
+      class="needs-validation"
       @submit.prevent="submit"
     >
       <div class="mb-3">
@@ -75,7 +75,7 @@ methods: {
     try {
         console.log(this.user);
         await this.register(this.user);
-        this.$router.push('/');
+        this.$router.push('/main');
     } catch (error) {
         this.hasError = "block";
         this.form_error = error.response.statusText;
