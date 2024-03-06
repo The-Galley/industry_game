@@ -44,3 +44,6 @@ bandit: ##@Linting Run bandit
 
 mypy: ##@Linting Run mypy
 	.venv/bin/mypy --config-file ./pyproject.toml $(PROJECT_PATH)
+
+upgrade-head:
+	docker compose exec rest python -m industry_game.db upgrade head
