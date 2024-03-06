@@ -10,18 +10,18 @@ from aiomisc.service.aiohttp import AIOHTTPService
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from yarl import URL
 
-from industry_game.handlers.games.create_game import CreateGameHandler
+from industry_game.handlers.games.game_create import CreateGameHandler
 from industry_game.handlers.games.game_details import GameDetailsHandler
 from industry_game.handlers.games.game_list import ListGameHandler
 from industry_game.handlers.games.game_update import UpdateGameHandler
-from industry_game.handlers.games.lobby.add_user_to_lobby import (
+from industry_game.handlers.games.lobby.lobby_add_user import (
     AddUserToGameLobbyHandler,
 )
-from industry_game.handlers.games.lobby.delete_user_from_lobby import (
+from industry_game.handlers.games.lobby.lobby_delete_user import (
     DeleteUserFromLobbyHandler,
 )
-from industry_game.handlers.games.lobby.list_lobby import ListGameLobbyHandler
-from industry_game.handlers.games.lobby.read_lobby import (
+from industry_game.handlers.games.lobby.lobby_list import ListGameLobbyHandler
+from industry_game.handlers.games.lobby.lobby_read import (
     ReadGameUserLobbyHandler,
 )
 from industry_game.handlers.ping import PingHandler
