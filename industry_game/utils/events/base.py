@@ -1,53 +1,93 @@
 import abc
-from collections.abc import Mapping
-from dataclasses import dataclass
 from datetime import datetime
-from enum import StrEnum
-from typing import Any
-from uuid import UUID
+from enum import StrEnum, unique
 
-from industry_game.utils.games.models import Game
+MAX_EVENT_PROGRESS = 1
 
 
+@unique
 class EventType(StrEnum):
     BUILDING = "BUILDING"
     PRODUCTION = "PRODUCTION"
 
 
+@unique
 class EventStatus(StrEnum):
     CREATED = "CREATED"
     SCHEDULED = "SCHEDULED"
+    PAUSED = "PAUSED"
     FINISHED = "FINISHED"
 
 
-@dataclass
 class AbstractEvent(abc.ABC):
-    uuid: UUID
-    status: EventStatus
-    type: EventType
-    game: Game
-    created_at: datetime
-    started_at: datetime | None
-    ended_at: datetime | None
-    during_sec: int
+    _created_at: datetime
+    _delay: int
+    _finished_at: datetime | None
+    _is_active: bool
+    _last_updated_at: datetime
+    _status: EventStatus
+    _progress: float
+
+    _name: str
+    _game_id: int
+
+    def __init__(
+        self,
+        name: str,
+        game_id: int,
+        delay: int,
+        created_at: datetime,
+        speed: float,
+        is_active: bool,
+    ) -> None:
+        self._name = name
+        self._game_id = game_id
+        self._created_at = created_at
+        self._delay = delay
+        self._finished_at = None
+        self._is_active = is_active
+        self._last_updated_at = created_at
+        self._progress = 0
+        self._speed = speed
+        self._status = EventStatus.CREATED
+
+    def __repr__(self) -> str:
+        return self._name
 
     @property
-    def properties(self) -> Mapping[str, Any]:
+    def progress(self) -> float:
+        return self._progress
+
+    @property
+    def game_id(self) -> int:
+        return self._game_id
+
+    def update_progress(self, dt: datetime) -> None:
+        new_progres = (
+            self._progress
+            + (dt - self._last_updated_at).total_seconds()
+            / self._delay
+            * self._speed
+        )
+        self._progress = min(MAX_EVENT_PROGRESS, new_progres)
+
+    def set_last_updated_at(self, dt: datetime) -> None:
+        self._last_updated_at = dt
+
+    def set_status(self, status: EventStatus) -> None:
+        self._status = status
+
+    @abc.abstractmethod
+    async def pre_hook(self) -> None:
         raise NotImplementedError
 
     @abc.abstractmethod
-    async def hook(self, *args: Any, **kwargs: Any) -> None:
+    async def execute(self) -> None:
         raise NotImplementedError
 
-    def model2dict(self) -> Mapping[str, Any]:
-        return {
-            "uuid": self.uuid,
-            "status": self.status,
-            "type": self.type,
-            "game_id": self.game.id,
-            "created_at": self.created_at,
-            "started_at": self.started_at,
-            "ended_at": self.ended_at,
-            "during_sec": self.during_sec,
-            "properties": self.properties,
-        }
+    @abc.abstractmethod
+    async def post_hook(self) -> None:
+        raise NotImplementedError
+
+    def is_active(self) -> bool:
+        return self._is_active

@@ -1,6 +1,7 @@
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from industry_game.utils.games.storage import GameStorage
+from industry_game.utils.games.store import GameStore
 from industry_game.utils.http.base import BaseHttpMixin
 from industry_game.utils.lobby.storage import LobbyStorage
 from industry_game.utils.users.processor import PlayerProcessor
@@ -27,3 +28,7 @@ class DependenciesMixin(BaseHttpMixin):
     @property
     def player_processor(self) -> PlayerProcessor:
         return self.request.app["player_processor"]
+
+    @property
+    def game_store(self) -> GameStore:
+        return self.request.app["game_store"]

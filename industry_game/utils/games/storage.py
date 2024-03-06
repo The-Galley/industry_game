@@ -6,13 +6,13 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from industry_game.db.models import Game as GameDb
 from industry_game.db.models import GameStatus
 from industry_game.utils.db import AbstractStorage, inject_session
-from industry_game.utils.games.models import Game, GamePagination
+from industry_game.utils.games.models import Game, GamePaginationResponse
 from industry_game.utils.pagination import MetaPagination
 
 
 class GameStorage(AbstractStorage):
     @inject_session
-    async def read_by_id(
+    async def get_by_id(
         self, session: AsyncSession, game_id: int
     ) -> Game | None:
         game = await session.get(GameDb, game_id)
@@ -25,12 +25,12 @@ class GameStorage(AbstractStorage):
         page: int,
         page_size: int,
         status: GameStatus | None = None,
-    ) -> GamePagination:
+    ) -> GamePaginationResponse:
         total, items = await asyncio.gather(
             self.count(status=status),
             self.get_items(page=page, page_size=page_size, status=status),
         )
-        return GamePagination(
+        return GamePaginationResponse(
             meta=MetaPagination.create(
                 total=total,
                 page=page,
@@ -92,7 +92,7 @@ class GameStorage(AbstractStorage):
         return Game.from_model(game)
 
     @inject_session
-    async def update(
+    async def update_text(
         self,
         session: AsyncSession,
         game_id: int,
@@ -110,6 +110,25 @@ class GameStorage(AbstractStorage):
             update(GameDb)
             .where(GameDb.id == game_id)
             .values(**data)
+            .returning(GameDb)
+        )
+        game = (await session.scalars(stmt)).one()
+        if commit:
+            await session.commit()
+        return Game.from_model(game)
+
+    @inject_session
+    async def update_status(
+        self,
+        session: AsyncSession,
+        game_id: int,
+        status: GameStatus,
+        commit: bool = True,
+    ) -> Game:
+        stmt = (
+            update(GameDb)
+            .where(GameDb.id == game_id)
+            .values(status=status)
             .returning(GameDb)
         )
         game = (await session.scalars(stmt)).one()
