@@ -1,8 +1,7 @@
+from dataclasses import dataclass
 from enum import StrEnum
 
 from pydantic import BaseModel, ConfigDict, Field
-
-from industry_game.utils.msgspec import CustomStruct
 
 
 class UserType(StrEnum):
@@ -17,18 +16,22 @@ class RegisterPlayerModel(BaseModel):
     name: str = Field(min_length=5)
 
 
-class AuthUserModel(BaseModel):
+class LoginUserModel(BaseModel):
     model_config = ConfigDict(str_min_length=8)
 
     username: str
     password: str
 
 
-class AuthUser(CustomStruct, frozen=True):
+@dataclass(frozen=True)
+class AuthUser:
     id: int
     username: str
     type: UserType
 
+    def to_dict(self) -> dict[str, int | str]:
+        return dict(id=self.id, username=self.username, type=self.type)
 
-class AuthToken(CustomStruct, frozen=True):
+
+class AuthToken(BaseModel):
     token: str

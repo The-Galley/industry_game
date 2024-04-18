@@ -35,7 +35,7 @@ from industry_game.handlers.players.register_player import RegisterPlayerHandler
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.base import BaseAuthorizationProvider
 from industry_game.utils.lobby.storage import LobbyStorage
-from industry_game.utils.users.processor import PlayerProcessor
+from industry_game.utils.users.providers import AuthDispatcher
 from industry_game.utils.users.storage import PlayerStorage
 
 MEGABYTE = 1024**2
@@ -57,7 +57,7 @@ class REST(AIOHTTPService):
         "player_storage",
         "authorization_provider",
         "session_factory",
-        "player_processor",
+        "auth_dispatcher",
     )
     __required__ = (
         "access_allow_origins",
@@ -71,7 +71,7 @@ class REST(AIOHTTPService):
     lobby_storage: LobbyStorage
     player_storage: PlayerStorage
     authorization_provider: BaseAuthorizationProvider
-    player_processor: PlayerProcessor
+    auth_dispatcher: AuthDispatcher
     session_factory: async_sessionmaker[AsyncSession]
 
     API_ROUTES: ApiHandlersType = (

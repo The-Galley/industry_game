@@ -48,3 +48,11 @@ group.add_argument("--pg-dsn", required=True, type=URL)
 group = parser.add_argument_group("Security")
 group.add_argument("--secret", type=str, default="secret")
 group.add_argument("--private-key", type=load_base64, required=True)
+
+group = parser.add_argument_group("Project options")
+group.add_argument("--project-title", default="Industry Game")
+group.add_argument(
+    "--project-description",
+    default="Meta game about industrialization and rise",
+)
+group.add_argument("--project-version", default="1.0.0")

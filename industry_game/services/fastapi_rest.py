@@ -1,0 +1,106 @@
+from collections.abc import Callable
+from http import HTTPMethod
+
+from aiomisc.service.uvicorn import UvicornApplication, UvicornService
+from fastapi import FastAPI, HTTPException
+from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
+from starlette.middleware.cors import CORSMiddleware
+
+from industry_game.api.router import router as api_router
+from industry_game.utils.http.auth.base import AuthManager
+from industry_game.utils.http.auth.jwt import (
+    MAYBE_AUTH,
+    REQUIRE_ADMIN_AUTH,
+    REQUIRE_AUTH,
+    REQUIRE_PLAYER_AUTH,
+)
+from industry_game.utils.http.exceptions.handlers import http_exception_handler
+from industry_game.utils.overrides import (
+    GetLoginProvider,
+    GetSessionFactory,
+    GetUserStorage,
+)
+from industry_game.utils.users.providers import LoginProvider
+from industry_game.utils.users.storage import UserStorage
+
+ExceptionHandlersType = tuple[tuple[type[Exception], Callable], ...]
+
+
+class REST(UvicornService):
+    __required__ = (
+        "debug",
+        "project_title",
+        "project_description",
+        "project_version",
+    )
+    __dependencies__ = (
+        "session_factory",
+        "auth_manager",
+        "login_provider",
+        "user_storage",
+    )
+    EXCEPTION_HANDLERS: ExceptionHandlersType = (
+        (HTTPException, http_exception_handler),
+    )
+
+    debug: bool
+    project_title: str
+    project_description: str
+    project_version: str
+
+    session_factory: async_sessionmaker[AsyncSession]
+    auth_manager: AuthManager
+    login_provider: LoginProvider
+    user_storage: UserStorage
+
+    async def create_application(self) -> UvicornApplication:
+        app = FastAPI(
+            debug=self.debug,
+            title=self.project_title,
+            description=self.project_description,
+            version=self.project_version,
+        )
+        self._add_middlewares(app)
+        self._add_routes(app)
+        self._add_exceptions(app)
+        self._add_dependency_overrides(app)
+        self._add_socket_io(app)
+        return app
+
+    def _add_middlewares(self, app: FastAPI) -> None:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
+            allow_credentials=True,
+            allow_methods=[
+                HTTPMethod.OPTIONS,
+                HTTPMethod.GET,
+                HTTPMethod.HEAD,
+                HTTPMethod.POST,
+                HTTPMethod.DELETE,
+            ],
+            allow_headers=["*"],
+        )
+
+    def _add_routes(self, app: FastAPI) -> None:
+        app.include_router(api_router)
+
+    def _add_exceptions(self, app: FastAPI) -> None:
+        for exception, handler in self.EXCEPTION_HANDLERS:
+            app.add_exception_handler(exception, handler)
+
+    def _add_dependency_overrides(self, app: FastAPI) -> None:
+        app.dependency_overrides.update(
+            {
+                MAYBE_AUTH: self.auth_manager.maybe_auth,
+                REQUIRE_AUTH: self.auth_manager.require_auth,
+                REQUIRE_ADMIN_AUTH: self.auth_manager.require_admin_auth,
+                REQUIRE_PLAYER_AUTH: self.auth_manager.require_player_auth,
+                GetSessionFactory: lambda: self.session_factory,
+                GetUserStorage: lambda: self.user_storage,
+                GetLoginProvider: lambda: self.login_provider,
+            }
+        )
+
+    def _add_socket_io(self, app: FastAPI) -> None:
+        pass

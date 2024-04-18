@@ -1,6 +1,7 @@
 import logging
 from collections import deque
 from datetime import UTC, datetime
+from uuid import UUID
 
 from industry_game.db.models import GameStatus
 from industry_game.utils.events.base import AbstractEvent, EventStatus
@@ -17,6 +18,7 @@ class StartGameSessionEvent(AbstractEvent):
 
     def __init__(
         self,
+        uuid: UUID,
         game_id: int,
         delay: int,
         created_at: datetime,
@@ -28,6 +30,7 @@ class StartGameSessionEvent(AbstractEvent):
         is_active: bool = True,
     ) -> None:
         super().__init__(
+            uuid=uuid,
             name=name,
             game_id=game_id,
             delay=delay,
@@ -70,6 +73,7 @@ class EndGameSessionEvent(AbstractEvent):
 
     def __init__(
         self,
+        uuid: UUID,
         event_queue: deque[AbstractEvent],
         session_controller: SessionController,
         game_id: int,
@@ -80,6 +84,7 @@ class EndGameSessionEvent(AbstractEvent):
         name: str = "StopGameSessionEvent",
     ) -> None:
         super().__init__(
+            uuid=uuid,
             name=name,
             game_id=game_id,
             delay=delay,

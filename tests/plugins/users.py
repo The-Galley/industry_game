@@ -5,7 +5,7 @@ from industry_game.db.models import User as UserDb
 from industry_game.utils.http.auth.jwt import JwtAuthrorizationProvider
 from industry_game.utils.security import Passgen
 from industry_game.utils.users.base import AuthUser, UserType
-from industry_game.utils.users.processor import PlayerProcessor
+from industry_game.utils.users.providers import AuthDispatcher
 from industry_game.utils.users.storage import PlayerStorage
 
 
@@ -17,12 +17,12 @@ def player_storage(
 
 
 @pytest.fixture
-def player_processor(
+def auth_dispatcher(
     player_storage: PlayerStorage,
     authorization_provider: JwtAuthrorizationProvider,
     passgen: Passgen,
-) -> PlayerProcessor:
-    return PlayerProcessor(
+) -> AuthDispatcher:
+    return AuthDispatcher(
         player_storage=player_storage,
         passgen=passgen,
         authorization_provider=authorization_provider,

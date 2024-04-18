@@ -112,13 +112,13 @@ def make_alembic_config(
     return config
 
 
-def _choices(enum_cls: type[StrEnum]) -> tuple[str, ...]:
-    return tuple(map(str, enum_cls))
-
-
 def make_pg_enum(enum_cls: type[StrEnum], **kwargs: Any) -> pg.ENUM:
     return pg.ENUM(
         enum_cls,
         values_callable=_choices,
         **kwargs,
     )
+
+
+def _choices(enum_cls: type[StrEnum]) -> tuple[str, ...]:
+    return tuple(map(str, enum_cls))

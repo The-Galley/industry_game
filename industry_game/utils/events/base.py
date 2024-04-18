@@ -1,6 +1,8 @@
 import abc
 from datetime import datetime
 from enum import StrEnum, unique
+from typing import Any
+from uuid import UUID
 
 MAX_EVENT_PROGRESS = 1
 
@@ -20,6 +22,7 @@ class EventStatus(StrEnum):
 
 
 class AbstractEvent(abc.ABC):
+    _uuid: UUID
     _created_at: datetime
     _delay: int
     _finished_at: datetime | None
@@ -33,6 +36,7 @@ class AbstractEvent(abc.ABC):
 
     def __init__(
         self,
+        uuid: UUID,
         name: str,
         game_id: int,
         delay: int,
@@ -40,6 +44,7 @@ class AbstractEvent(abc.ABC):
         speed: float,
         is_active: bool,
     ) -> None:
+        self._uuid = uuid
         self._name = name
         self._game_id = game_id
         self._created_at = created_at
@@ -61,6 +66,10 @@ class AbstractEvent(abc.ABC):
     @property
     def game_id(self) -> int:
         return self._game_id
+
+    @property
+    def uuid(self) -> UUID:
+        return self._uuid
 
     def update_progress(self, dt: datetime) -> None:
         new_progres = (
@@ -91,3 +100,16 @@ class AbstractEvent(abc.ABC):
 
     def is_active(self) -> bool:
         return self._is_active
+
+    def model2dict(self) -> dict[str, Any]:
+        return {
+            "name": self._name,
+            "game_id": self._game_id,
+            "created_at": self._created_at,
+            "delay": self._delay,
+            "finished_at": self._finished_at,
+            "is_active": self._is_active,
+            "last_updated_at": self._last_updated_at,
+            "status": self._status,
+            "progress": self._progress,
+        }

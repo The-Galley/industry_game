@@ -4,7 +4,7 @@ from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.games.store import GameStore
 from industry_game.utils.http.base import BaseHttpMixin
 from industry_game.utils.lobby.storage import LobbyStorage
-from industry_game.utils.users.processor import PlayerProcessor
+from industry_game.utils.users.providers import AuthDispatcher
 from industry_game.utils.users.storage import PlayerStorage
 
 
@@ -26,8 +26,8 @@ class DependenciesMixin(BaseHttpMixin):
         return self.request.app["player_storage"]
 
     @property
-    def player_processor(self) -> PlayerProcessor:
-        return self.request.app["player_processor"]
+    def auth_dispatcher(self) -> AuthDispatcher:
+        return self.request.app["auth_dispatcher"]
 
     @property
     def game_store(self) -> GameStore:

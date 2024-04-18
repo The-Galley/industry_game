@@ -1,27 +1,23 @@
 from enum import StrEnum, unique
 
-import msgspec
+from pydantic import BaseModel, ConfigDict
 
-from industry_game.db.models import UserGameLobby as UserGameLobbyDb
 from industry_game.utils.pagination import MetaPagination
-from industry_game.utils.users.models import ShortUser
+from industry_game.utils.users.models import ShortUserModel
 
 
-class Lobby(msgspec.Struct, frozen=True):
+class LobbyModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     game_id: int
     user_id: int
 
-    @classmethod
-    def from_model(cls, obj: UserGameLobbyDb) -> "Lobby":
-        return Lobby(
-            game_id=obj.game_id,
-            user_id=obj.user_id,
-        )
 
+class LobbyPaginationModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-class LobbyPagination(msgspec.Struct, frozen=True):
     meta: MetaPagination
-    items: list[ShortUser]
+    items: list[ShortUserModel]
 
 
 @unique
@@ -30,5 +26,5 @@ class LobbyStatusType(StrEnum):
     NOT_CHECKED_IN = "NOT_CHECKED_IN"
 
 
-class LobbyStatus(msgspec.Struct, frozen=True):
+class LobbyStatus(BaseModel):
     status: StrEnum

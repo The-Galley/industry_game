@@ -1,43 +1,59 @@
-import msgspec
+from collections.abc import Mapping, Sequence
+from dataclasses import dataclass
+from typing import Self
+
+from pydantic import BaseModel, ConfigDict
 
 from industry_game.db.models import User as UserDb
-from industry_game.utils.msgspec import CustomStruct
 from industry_game.utils.pagination import MetaPagination
 from industry_game.utils.users.base import UserType
 
 
-class ShortUser(CustomStruct, frozen=True):
+@dataclass(frozen=True)
+class User:
+    id: int
+    type: UserType
+    username: str
+    properties: Mapping[str, str]
+
+    @classmethod
+    def from_model(cls, obj: UserDb) -> Self:
+        return cls(
+            id=obj.id,
+            type=obj.type,
+            username=obj.username,
+            properties=obj.properties,
+        )
+
+    @property
+    def telegram(self) -> str:
+        return self.properties.get("telegram", "")
+
+    @property
+    def name(self) -> str:
+        return self.properties.get("name", "")
+
+
+class ShortUserModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     id: int
     type: UserType
     username: str
 
-    @classmethod
-    def from_model(self, obj: UserDb) -> "ShortUser":
-        return ShortUser(
-            id=obj.id,
-            type=obj.type,
-            username=obj.username,
-        )
 
+class FullUserModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
 
-class UserPagination(msgspec.Struct, frozen=True):
-    meta: MetaPagination
-    items: list[ShortUser]
-
-
-class FullUser(CustomStruct, frozen=True):
     id: int
     type: UserType
     username: str
     telegram: str
     name: str
 
-    @classmethod
-    def from_model(self, obj: UserDb) -> "FullUser":
-        return FullUser(
-            id=obj.id,
-            type=obj.type,
-            username=obj.username,
-            telegram=obj.properties.get("telegram", ""),
-            name=obj.properties.get("name", ""),
-        )
+
+class UserPaginationModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    meta: MetaPagination
+    items: Sequence[ShortUserModel]

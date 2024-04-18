@@ -1,5 +1,5 @@
-import msgspec
+from pydantic import BaseModel
 
 
-class StatusResponse(msgspec.Struct):
+class StatusResponse(BaseModel):
     message: str

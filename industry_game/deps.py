@@ -10,16 +10,17 @@ from industry_game.utils.db import (
     create_async_session_factory,
 )
 from industry_game.utils.games.storage import GameStorage
+from industry_game.utils.http.auth.base import AuthManager, IAuthProvider
 from industry_game.utils.http.auth.jwt import (
-    JwtAuthrorizationProvider,
+    JwtAuthProvider,
     JwtProcessor,
     parse_private_key,
 )
 from industry_game.utils.lobby.storage import LobbyStorage
 from industry_game.utils.rsa import stringify_public_key
 from industry_game.utils.security import Passgen
-from industry_game.utils.users.processor import PlayerProcessor
-from industry_game.utils.users.storage import PlayerStorage
+from industry_game.utils.users.providers import LoginProvider
+from industry_game.utils.users.storage import UserStorage
 
 
 def config_deps(args: Namespace) -> None:  # noqa: C901
@@ -51,10 +52,10 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
         return LobbyStorage(session_factory=session_factory)
 
     @dependency
-    def player_storage(
+    def user_storage(
         session_factory: async_sessionmaker[AsyncSession],
-    ) -> PlayerStorage:
-        return PlayerStorage(session_factory=session_factory)
+    ) -> UserStorage:
+        return UserStorage(session_factory=session_factory)
 
     @dependency
     def sio() -> socketio.AsyncServer:
@@ -70,23 +71,27 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
         )
 
     @dependency
-    def authorization_provider(
+    def auth_provider(
         jwt_processor: JwtProcessor,
-    ) -> JwtAuthrorizationProvider:
-        return JwtAuthrorizationProvider(jwt_processor=jwt_processor)
+    ) -> JwtAuthProvider:
+        return JwtAuthProvider(jwt_processor=jwt_processor)
 
     @dependency
     def passgen() -> Passgen:
         return Passgen(secret=args.secret)
 
     @dependency
-    def player_processor(
-        player_storage: PlayerStorage,
-        authorization_provider: JwtAuthrorizationProvider,
+    def auth_manager(auth_provider: IAuthProvider) -> AuthManager:
+        return AuthManager(auth_provider=auth_provider)
+
+    @dependency
+    def login_provider(
+        user_storage: UserStorage,
+        auth_provider: JwtAuthProvider,
         passgen: Passgen,
-    ) -> PlayerProcessor:
-        return PlayerProcessor(
-            player_storage=player_storage,
+    ) -> LoginProvider:
+        return LoginProvider(
+            user_storage=user_storage,
             passgen=passgen,
-            authorization_provider=authorization_provider,
+            auth_provider=auth_provider,
         )

@@ -1,5 +1,5 @@
 default_language_version:
-  python: python3.12
+  python: python3.11
 
 repos:
   - repo: https://github.com/pre-commit/pre-commit-hooks
@@ -35,7 +35,7 @@ repos:
         name: mypy
         entry: mypy ./industry_game --config-file ./pyproject.toml
         language: python
-        language_version: python3.12
+        language_version: python3.11
         require_serial: true
         pass_filenames: false
 

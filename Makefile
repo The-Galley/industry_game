@@ -7,6 +7,8 @@ HELP_FUN = \
     print"$$_:\n", map"  $$_->[0]".(" "x(20-length($$_->[0])))."$$_->[1]\n",\
     @{$$help{$$_}},"\n" for keys %help; \
 
+PYTHON_VERSION ?= 3.11
+
 help: ##@Help Show this help
 	@echo -e "Usage: make [target] ...\n"
 	@perl -e '$(HELP_FUN)' $(MAKEFILE_LIST)
@@ -15,7 +17,7 @@ clean_dev:
 	rm -rf .venv/
 
 develop: clean_dev  ##@Develop Create project venv
-	python3.12 -m venv .venv
+	python$(PYTHON_VERSION) -m venv .venv
 	.venv/bin/pip install -U pip poetry
 	.venv/bin/poetry config virtualenvs.create false
 	.venv/bin/poetry install

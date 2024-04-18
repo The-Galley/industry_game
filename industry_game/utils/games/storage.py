@@ -6,7 +6,11 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from industry_game.db.models import Game as GameDb
 from industry_game.db.models import GameStatus
 from industry_game.utils.db import AbstractStorage, inject_session
-from industry_game.utils.games.models import Game, GamePaginationResponse
+from industry_game.utils.games.models import (
+    Game,
+    GameModel,
+    GamePaginationModel,
+)
 from industry_game.utils.pagination import MetaPagination
 
 
@@ -25,12 +29,12 @@ class GameStorage(AbstractStorage):
         page: int,
         page_size: int,
         status: GameStatus | None = None,
-    ) -> GamePaginationResponse:
+    ) -> GamePaginationModel:
         total, items = await asyncio.gather(
             self.count(status=status),
             self.get_items(page=page, page_size=page_size, status=status),
         )
-        return GamePaginationResponse(
+        return GamePaginationModel(
             meta=MetaPagination.create(
                 total=total,
                 page=page,
@@ -76,7 +80,7 @@ class GameStorage(AbstractStorage):
         description: str,
         created_by_id: int,
         commit: bool = True,
-    ) -> Game:
+    ) -> GameModel:
         stmt = (
             insert(GameDb)
             .values(
@@ -89,7 +93,7 @@ class GameStorage(AbstractStorage):
         game = (await session.scalars(stmt)).one()
         if commit:
             await session.commit()
-        return Game.from_model(game)
+        return GameModel.model_validate(game)
 
     @inject_session
     async def update_text(
@@ -99,7 +103,7 @@ class GameStorage(AbstractStorage):
         name: str | None,
         description: str | None,
         commit: bool = True,
-    ) -> Game:
+    ) -> Game | None:
         data = {}
         if name is not None:
             data["name"] = name
@@ -112,10 +116,10 @@ class GameStorage(AbstractStorage):
             .values(**data)
             .returning(GameDb)
         )
-        game = (await session.scalars(stmt)).one()
+        game = (await session.scalars(stmt)).first()
         if commit:
             await session.commit()
-        return Game.from_model(game)
+        return Game.from_model(game) if game else None
 
     @inject_session
     async def update_status(

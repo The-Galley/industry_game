@@ -1,17 +1,18 @@
 import math
+from typing import Self
 
-from industry_game.utils.msgspec import CustomStruct
+from pydantic import BaseModel
 
 
-class MetaPagination(CustomStruct, frozen=True):
+class MetaPagination(BaseModel):
     page: int
     pages: int
     total: int
     page_size: int
 
     @classmethod
-    def create(cls, page: int, page_size: int, total: int) -> "MetaPagination":
-        return MetaPagination(
+    def create(cls, page: int, page_size: int, total: int) -> Self:
+        return cls(
             page=page,
             page_size=page_size,
             total=total,

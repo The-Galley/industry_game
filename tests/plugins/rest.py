@@ -13,7 +13,7 @@ from industry_game.services.rest import REST
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.base import BaseAuthorizationProvider
 from industry_game.utils.lobby.storage import LobbyStorage
-from industry_game.utils.users.processor import PlayerProcessor
+from industry_game.utils.users.providers import AuthDispatcher
 from industry_game.utils.users.storage import PlayerStorage
 
 
@@ -33,7 +33,7 @@ def rest_service(
     game_storage: GameStorage,
     lobby_storage: LobbyStorage,
     player_storage: PlayerStorage,
-    player_processor: PlayerProcessor,
+    auth_dispatcher: AuthDispatcher,
     authorization_provider: BaseAuthorizationProvider,
     session_factory: async_sessionmaker[AsyncSession],
 ) -> REST:
@@ -44,7 +44,7 @@ def rest_service(
         game_storage=game_storage,
         lobby_storage=lobby_storage,
         player_storage=player_storage,
-        player_processor=player_processor,
+        auth_dispatcher=auth_dispatcher,
         authorization_provider=authorization_provider,
         session_factory=session_factory,
         access_allow_origins=[URL("https://example.com")],

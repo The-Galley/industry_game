@@ -1,81 +1,51 @@
 import abc
-from collections.abc import Callable, Coroutine
-from functools import wraps
-from typing import Any, Concatenate, ParamSpec, TypeVar
+from dataclasses import dataclass
+from http import HTTPStatus
 
-from aiohttp.web_exceptions import HTTPForbidden, HTTPUnauthorized
-from aiohttp.web_request import Request
+from fastapi import HTTPException, Request
 
-from industry_game.utils.http.base import BaseHttpMixin
-from industry_game.utils.typed import not_none
 from industry_game.utils.users.base import AuthUser, UserType
 
 
-class BaseAuthorizationProvider(abc.ABC):
+class IAuthProvider(abc.ABC):
     @abc.abstractmethod
-    def authorize(self, request: Request) -> AuthUser | None:
+    async def authorize(self, request: Request) -> AuthUser | None:
         raise NotImplementedError
 
 
-class AuthMixin(BaseHttpMixin):
-    USER_KEY = "user"
+@dataclass(frozen=True)
+class AuthManager:
+    auth_provider: IAuthProvider
 
-    @property
-    def authorization_provider(self) -> BaseAuthorizationProvider | None:
-        return self.request.app.get("authorization_provider")
+    async def maybe_auth(self, request: Request) -> AuthUser | None:
+        return await self.auth_provider.authorize(request)
 
-    @property
-    def user_or_none(self) -> AuthUser | None:
-        if self.USER_KEY not in self.request:
-            if not self.authorization_provider:
-                user = None
-            else:
-                user = self.authorization_provider.authorize(self.request)
+    async def require_auth(
+        self,
+        request: Request,
+        user_type: UserType | None = None,
+    ) -> AuthUser:
+        auth_user = await self.auth_provider.authorize(request)
+        if auth_user is None:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Required authorization",
+            )
+        if user_type is not None and auth_user.type != user_type:
+            raise HTTPException(
+                status_code=HTTPStatus.FORBIDDEN,
+                detail="Forbidden",
+            )
+        return auth_user
 
-            self.request[self.USER_KEY] = user
+    async def require_admin_auth(
+        self,
+        request: Request,
+    ) -> AuthUser:
+        return await self.require_auth(request, user_type=UserType.ADMIN)
 
-        return self.request[self.USER_KEY]
-
-    @property
-    def user(self) -> AuthUser:
-        return not_none(self.user_or_none)
-
-
-TClass = TypeVar("TClass", bound=AuthMixin)
-TParams = ParamSpec("TParams")
-TResult = TypeVar("TResult")
-
-
-def _require_user_type_authorization(user_type: UserType | None) -> Callable:
-    def require_authorization(
-        func: Callable[
-            Concatenate[TClass, TParams], Coroutine[Any, Any, TResult]
-        ],
-    ) -> Callable[Concatenate[TClass, TParams], Coroutine[Any, Any, TResult]]:
-        @wraps(func)
-        async def wrapper(
-            self: TClass, /, *args: TParams.args, **kwargs: TParams.kwargs
-        ) -> TResult:
-            if self.user_or_none is None:
-                raise HTTPUnauthorized
-
-            if user_type is not None:
-                if self.user_or_none.type != user_type:
-                    raise HTTPForbidden
-
-            return await func(self, *args, **kwargs)
-
-        return wrapper
-
-    return require_authorization
-
-
-require_player_authorization = _require_user_type_authorization(
-    user_type=UserType.PLAYER,
-)
-
-require_admin_authorization = _require_user_type_authorization(
-    user_type=UserType.ADMIN,
-)
-
-require_authorization = _require_user_type_authorization(user_type=None)
+    async def require_player_auth(
+        self,
+        request: Request,
+    ) -> AuthUser:
+        return await self.require_auth(request, user_type=UserType.PLAYER)
