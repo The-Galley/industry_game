@@ -1,3 +1,4 @@
+PYTHON_VERSION = 3.11
 PROJECT_PATH = ./industry_game/
 TEST_PATH = ./tests/
 
@@ -15,7 +16,7 @@ clean_dev:
 	rm -rf .venv/
 
 develop: clean_dev  ##@Develop Create project venv
-	python3.12 -m venv .venv
+	python$(PYTHON_VERSION) -m venv .venv
 	.venv/bin/pip install -U pip poetry
 	.venv/bin/poetry config virtualenvs.create false
 	.venv/bin/poetry install
