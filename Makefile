@@ -1,3 +1,4 @@
+PYTHON_VERSION = 3.11
 PROJECT_PATH = ./industry_game/
 TEST_PATH = ./tests/
 

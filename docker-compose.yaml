@@ -35,12 +35,11 @@ services:
 
   frontend:
     restart: on-failure
-    image: andytakker/industry-game-frontend:latest
-    # # build:
-    # #   dockerfile: ./docker/frontend.dockerfile
-    # #   context: .
-    #   args:
-    #     BASE_URL: https://vk.com
+    build:
+      dockerfile: ./docker/frontend.dockerfile
+      context: .
+      args:
+        BASE_URL: https://vk.com
     ports:
       - 80:80
       - 443:443

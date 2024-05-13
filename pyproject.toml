@@ -8,7 +8,7 @@ readme = "README.md"
 
 [tool.poetry.dependencies]
 python = "^3.11"
-aiomisc = {extras = ["asgi", "cron", "uvicorn", "uvloop"], version = "^17.5.4"}
+aiomisc = {extras = ["asgi", "cron", "uvicorn"], version = "^17.5.4"}
 sqlalchemy = "^2.0.25"
 alembic = "^1.13.1"
 python-socketio = "^5.11.0"
