@@ -9,7 +9,15 @@ class GetGameStorage:
     pass
 
 
+class GetLobbyStorage:
+    pass
+
+
 class GetUserStorage:
+    pass
+
+
+class GetGameController:
     pass
 
 

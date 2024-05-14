@@ -18,7 +18,7 @@ from industry_game.utils.overrides import (
 from industry_game.utils.users.base import (
     AuthToken,
     AuthUser,
-    AuthUserModel,
+    LoginUserModel,
     RegisterPlayerModel,
     UserType,
 )
@@ -67,7 +67,7 @@ async def read_user(
             status_code=HTTPStatus.NOT_FOUND,
             detail="User not found",
         )
-    return user
+    return FullUserModel.model_validate(user)
 
 
 @router.post(
@@ -84,7 +84,7 @@ async def read_user(
     },
 )
 async def login(
-    user: AuthUserModel,
+    user: LoginUserModel,
     response: Response,
     login_provider: LoginProvider = Depends(GetLoginProvider),
     auth_user: AuthUser | None = Depends(MAYBE_AUTH),

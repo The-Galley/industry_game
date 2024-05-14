@@ -1,3 +1,4 @@
+from collections import deque
 from dataclasses import dataclass
 from datetime import datetime
 from typing import Annotated, Self
@@ -6,6 +7,8 @@ from pydantic import BaseModel, ConfigDict, StringConstraints
 
 from industry_game.db.models import Game as GameDb
 from industry_game.db.models import GameStatus
+from industry_game.utils.events.base import AbstractEvent
+from industry_game.utils.games.session import SessionController
 from industry_game.utils.pagination import MetaPagination
 
 
@@ -73,3 +76,13 @@ class UpdateGameModel(BaseModel):
     description: Annotated[
         str, StringConstraints(strip_whitespace=True, max_length=512)
     ] | None = None
+
+
+class ProcessGame:
+    def __init__(
+        self,
+        game: Game,
+        event_queue: deque[AbstractEvent],
+        session_controller: SessionController,
+    ) -> None:
+        pass

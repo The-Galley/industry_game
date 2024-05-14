@@ -4,7 +4,7 @@ from aiomisc import Service, entrypoint
 
 from industry_game.args import parser
 from industry_game.deps import config_deps
-from industry_game.services.fastapi_rest import REST
+from industry_game.services.rest import REST
 
 log = logging.getLogger(__name__)
 

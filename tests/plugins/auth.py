@@ -4,8 +4,9 @@ import pytest
 from cryptography.hazmat.primitives.asymmetric import rsa
 
 from industry_game.db.models import User
+from industry_game.utils.http.auth.base import AuthManager, IAuthProvider
 from industry_game.utils.http.auth.jwt import (
-    JwtAuthrorizationProvider,
+    JwtAuthProvider,
     JwtProcessor,
 )
 from industry_game.utils.rsa import (
@@ -41,10 +42,8 @@ def jwt_processor(private_key_str: str, public_key_str: str) -> JwtProcessor:
 
 
 @pytest.fixture
-def authorization_provider(
-    jwt_processor: JwtProcessor,
-) -> JwtAuthrorizationProvider:
-    return JwtAuthrorizationProvider(jwt_processor=jwt_processor)
+def auth_provider(jwt_processor: JwtProcessor) -> JwtAuthProvider:
+    return JwtAuthProvider(jwt_processor=jwt_processor)
 
 
 @pytest.fixture
@@ -69,3 +68,8 @@ def token_from_user(jwt_processor: JwtProcessor) -> Callable:
         )
 
     return _factory
+
+
+@pytest.fixture
+def auth_manager(auth_provider: IAuthProvider) -> AuthManager:
+    return AuthManager(auth_provider=auth_provider)

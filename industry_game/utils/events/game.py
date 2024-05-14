@@ -1,7 +1,7 @@
 import logging
 from collections import deque
 from datetime import UTC, datetime
-from uuid import UUID
+from uuid import UUID, uuid4
 
 from industry_game.db.models import GameStatus
 from industry_game.utils.events.base import AbstractEvent, EventStatus
@@ -18,17 +18,19 @@ class StartGameSessionEvent(AbstractEvent):
 
     def __init__(
         self,
-        uuid: UUID,
         game_id: int,
         delay: int,
         created_at: datetime,
         event_queue: deque[AbstractEvent],
         session_controller: SessionController,
         game_storage: GameStorage,
+        uuid: UUID | None = None,
         name: str = "StartGameSessionEvent",
         speed: float = 1.0,
-        is_active: bool = True,
+        is_active: bool = False,
     ) -> None:
+        if uuid is None:
+            uuid = uuid4()
         super().__init__(
             uuid=uuid,
             name=name,
@@ -73,16 +75,24 @@ class EndGameSessionEvent(AbstractEvent):
 
     def __init__(
         self,
-        uuid: UUID,
         event_queue: deque[AbstractEvent],
         session_controller: SessionController,
         game_id: int,
         delay: int,
-        created_at: datetime,
-        speed: float,
-        is_active: bool,
+        created_at: datetime | None = None,
+        speed: float | None = None,
+        is_active: bool | None = None,
         name: str = "StopGameSessionEvent",
+        uuid: UUID | None = None,
     ) -> None:
+        if created_at is None:
+            created_at = datetime.now(UTC)
+        if speed is None:
+            speed = 1.0
+        if is_active is None:
+            is_active = True
+        if uuid is None:
+            uuid = uuid4()
         super().__init__(
             uuid=uuid,
             name=name,
@@ -132,8 +142,11 @@ class PauseGameSessionEvent(AbstractEvent):
         speed: float,
         is_active: bool,
         name: str = "PauseGameSessionEvent",
+        uuid: UUID | None = None,
     ) -> None:
         self._event_queue = event_queue
+        if uuid is None:
+            uuid = uuid4()
         super().__init__(
             name=name,
             game_id=game_id,
@@ -141,6 +154,7 @@ class PauseGameSessionEvent(AbstractEvent):
             created_at=created_at,
             speed=speed,
             is_active=is_active,
+            uuid=uuid,
         )
 
     async def pre_hook(self) -> None:

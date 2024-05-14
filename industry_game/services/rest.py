@@ -1,162 +1,119 @@
-from collections.abc import Sequence
-from itertools import chain
-from typing import Any
+from collections.abc import Callable
+from http import HTTPMethod
 
-import aiohttp_cors
-from aiohttp import hdrs
-from aiohttp.web import Application
-from aiohttp.web_urldispatcher import AbstractRoute
-from aiomisc.service.aiohttp import AIOHTTPService
+from aiomisc.service.uvicorn import UvicornApplication, UvicornService
+from fastapi import FastAPI, HTTPException
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
-from yarl import URL
+from starlette.middleware.cors import CORSMiddleware
 
-from industry_game.handlers.games.game_create import CreateGameHandler
-from industry_game.handlers.games.game_details import GameDetailsHandler
-from industry_game.handlers.games.game_list import ListGameHandler
-from industry_game.handlers.games.game_start import StartGameHandler
-from industry_game.handlers.games.game_update import UpdateGameHandler
-from industry_game.handlers.games.lobby.lobby_add_user import (
-    AddUserToGameLobbyHandler,
-)
-from industry_game.handlers.games.lobby.lobby_delete_user import (
-    DeleteUserFromLobbyHandler,
-)
-from industry_game.handlers.games.lobby.lobby_list import ListGameLobbyHandler
-from industry_game.handlers.games.lobby.lobby_read import (
-    ReadGameUserLobbyHandler,
-)
-from industry_game.handlers.ping import PingHandler
-from industry_game.handlers.players.list_player import ListPlayerHandler
-from industry_game.handlers.players.login_player import LoginPlayerHandler
-from industry_game.handlers.players.read_by_id_player import (
-    ReadByIdPlayerHandler,
-)
-from industry_game.handlers.players.register_player import RegisterPlayerHandler
+from industry_game.api.router import router as api_router
 from industry_game.utils.games.storage import GameStorage
-from industry_game.utils.http.auth.base import BaseAuthorizationProvider
-from industry_game.utils.lobby.storage import LobbyStorage
-from industry_game.utils.users.providers import AuthDispatcher
-from industry_game.utils.users.storage import PlayerStorage
-
-MEGABYTE = 1024**2
-ALLOWED_METHODS = (
-    hdrs.METH_OPTIONS,
-    hdrs.METH_GET,
-    hdrs.METH_POST,
-    hdrs.METH_DELETE,
+from industry_game.utils.http.auth.base import AuthManager
+from industry_game.utils.http.auth.jwt import (
+    MAYBE_AUTH,
+    REQUIRE_ADMIN_AUTH,
+    REQUIRE_AUTH,
+    REQUIRE_PLAYER_AUTH,
 )
+from industry_game.utils.http.exceptions.handlers import http_exception_handler
+from industry_game.utils.lobby.storage import LobbyStorage
+from industry_game.utils.overrides import (
+    GetGameStorage,
+    GetLobbyStorage,
+    GetLoginProvider,
+    GetSessionFactory,
+    GetUserStorage,
+)
+from industry_game.utils.users.providers import LoginProvider
+from industry_game.utils.users.storage import UserStorage
 
-ApiHandlersType = tuple[tuple[str, str, Any], ...]
-NamespacesType = tuple[tuple[str, Any], ...]
+ExceptionHandlersType = tuple[tuple[type[Exception], Callable], ...]
 
 
-class REST(AIOHTTPService):
+class REST(UvicornService):
+    __required__ = (
+        "debug",
+        "project_title",
+        "project_description",
+        "project_version",
+    )
     __dependencies__ = (
+        "session_factory",
+        "auth_manager",
+        "login_provider",
+        "user_storage",
         "game_storage",
         "lobby_storage",
-        "player_storage",
-        "authorization_provider",
-        "session_factory",
-        "auth_dispatcher",
     )
-    __required__ = (
-        "access_allow_origins",
-        "cors_max_age",
+    EXCEPTION_HANDLERS: ExceptionHandlersType = (
+        (HTTPException, http_exception_handler),
     )
 
-    access_allow_origins: Sequence[URL]
-    cors_max_age: int
+    debug: bool
+    project_title: str
+    project_description: str
+    project_version: str
 
+    session_factory: async_sessionmaker[AsyncSession]
+    auth_manager: AuthManager
+    login_provider: LoginProvider
+    user_storage: UserStorage
     game_storage: GameStorage
     lobby_storage: LobbyStorage
-    player_storage: PlayerStorage
-    authorization_provider: BaseAuthorizationProvider
-    auth_dispatcher: AuthDispatcher
-    session_factory: async_sessionmaker[AsyncSession]
 
-    API_ROUTES: ApiHandlersType = (
-        (hdrs.METH_GET, "/api/v1/ping/", PingHandler),
-        # user handlers
-        (hdrs.METH_GET, "/api/v1/players/", ListPlayerHandler),
-        (hdrs.METH_GET, "/api/v1/players/{player_id}/", ReadByIdPlayerHandler),
-        (hdrs.METH_POST, "/api/v1/players/login/", LoginPlayerHandler),
-        (hdrs.METH_POST, "/api/v1/players/register/", RegisterPlayerHandler),
-        # game handlers
-        (hdrs.METH_GET, "/api/v1/games/", ListGameHandler),
-        (hdrs.METH_POST, "/api/v1/games/", CreateGameHandler),
-        (hdrs.METH_GET, "/api/v1/games/{game_id}/", GameDetailsHandler),
-        (hdrs.METH_POST, "/api/v1/games/{game_id}/", UpdateGameHandler),
-        (hdrs.METH_POST, "/api/v1/games/{game_id}/start/", StartGameHandler),
-        # lobby handlers
-        (hdrs.METH_GET, "/api/v1/games/{game_id}/lobby/", ListGameLobbyHandler),
-        (
-            hdrs.METH_POST,
-            "/api/v1/games/{game_id}/lobby/",
-            AddUserToGameLobbyHandler,
-        ),
-        (
-            hdrs.METH_GET,
-            "/api/v1/games/{game_id}/lobby/status/",
-            ReadGameUserLobbyHandler,
-        ),
-        (
-            hdrs.METH_DELETE,
-            "/api/v1/games/{game_id}/lobby/",
-            DeleteUserFromLobbyHandler,
-        ),
-    )
-    WS_NAMESPACES: NamespacesType = ()
-
-    async def create_application(self) -> Application:
-        app = Application(
-            client_max_size=10 * MEGABYTE,
+    async def create_application(self) -> UvicornApplication:
+        app = FastAPI(
+            debug=self.debug,
+            title=self.project_title,
+            description=self.project_description,
+            version=self.project_version,
+            openapi_url="/docs/openapi.json",
+            docs_url="/docs/swagger",
+            redoc_url="/docs/redoc",
         )
-        routes = self._add_routes(app)
-        self._add_cors(app, routes)
         self._add_middlewares(app)
-        self._add_dependencies(app)
-        # self._add_socketio(app)
+        self._add_routes(app)
+        self._add_exceptions(app)
+        self._add_dependency_overrides(app)
+        self._add_socket_io(app)
         return app
 
-    def _add_routes(self, app: Application) -> list[AbstractRoute]:
-        return [
-            app.router.add_route(
-                method=method,
-                path=path,
-                handler=handler,
-            )
-            for method, path, handler in self.API_ROUTES
-        ]
-
-    def _add_cors(
-        self, app: Application, routes: Sequence[AbstractRoute]
-    ) -> None:
-        resource_options = aiohttp_cors.ResourceOptions(
-            allow_headers="*",
-            allow_methods=ALLOWED_METHODS,
+    def _add_middlewares(self, app: FastAPI) -> None:
+        app.add_middleware(
+            CORSMiddleware,
+            allow_origins=["*"],
             allow_credentials=True,
-            max_age=self.cors_max_age,
+            allow_methods=[
+                HTTPMethod.OPTIONS,
+                HTTPMethod.GET,
+                HTTPMethod.HEAD,
+                HTTPMethod.POST,
+                HTTPMethod.DELETE,
+            ],
+            allow_headers=["*"],
         )
-        defaults = {
-            str(url): resource_options for url in self.access_allow_origins
-        }
-        cors = aiohttp_cors.setup(app=app, defaults=defaults)
-        for route in routes:
-            cors.add(route)
 
-    def _add_middlewares(self, app: Application) -> None:
+    def _add_routes(self, app: FastAPI) -> None:
+        app.include_router(api_router)
+
+    def _add_exceptions(self, app: FastAPI) -> None:
+        for exception, handler in self.EXCEPTION_HANDLERS:
+            app.add_exception_handler(exception, handler)
+
+    def _add_dependency_overrides(self, app: FastAPI) -> None:
+        app.dependency_overrides.update(
+            {
+                MAYBE_AUTH: self.auth_manager.maybe_auth,
+                REQUIRE_AUTH: self.auth_manager.require_auth,
+                REQUIRE_ADMIN_AUTH: self.auth_manager.require_admin_auth,
+                REQUIRE_PLAYER_AUTH: self.auth_manager.require_player_auth,
+                GetSessionFactory: lambda: self.session_factory,
+                GetUserStorage: lambda: self.user_storage,
+                GetLoginProvider: lambda: self.login_provider,
+                GetGameStorage: lambda: self.game_storage,
+                GetLobbyStorage: lambda: self.lobby_storage,
+            }
+        )
+
+    def _add_socket_io(self, app: FastAPI) -> None:
         pass
-
-    def _add_dependencies(self, app: Application) -> None:
-        for name in chain(self.__dependencies__, self.__required__):
-            app[name] = getattr(self, name)
-
-    # def _add_socketio(self, app: Application) -> None:
-    #     self.sio.attach(app)
-    #     deps = {}
-    #     for name in chain(self.__dependencies__, self.__required__):
-    #         deps[name] = getattr(self, name)
-
-    #     for path, namespace_class in self.WS_NAMESPACES:
-    #         namespace = namespace_class(deps=deps, namespace=path)
-    #         self.sio.register_namespace(namespace)

@@ -31,7 +31,7 @@ async def test_game_create_empty_json(
     admin_headers: Mapping[str, str],
 ):
     response = await api_client.post(API_URL, headers=admin_headers)
-    assert response.status == HTTPStatus.BAD_REQUEST
+    assert response.status == HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 async def test_game_create_successful_status_created(

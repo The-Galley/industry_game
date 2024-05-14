@@ -7,7 +7,7 @@ from datetime import UTC, datetime
 from industry_game.utils.events.base import AbstractEvent
 from industry_game.utils.events.game import StartGameSessionEvent
 from industry_game.utils.games.exceptions import GameNotFoundException
-from industry_game.utils.games.models import Game, MasterGame
+from industry_game.utils.games.models import Game, ProcessGame
 from industry_game.utils.games.session import SESSIONS, SessionController
 from industry_game.utils.games.storage import GameStorage
 
@@ -17,9 +17,9 @@ START_GAME_DELAY = 3 * 60  # 3 minutes
 
 
 @dataclass(frozen=True)
-class GameStore:
+class GameController:
     game_storage: GameStorage
-    current_games: MutableMapping[int, MasterGame]
+    current_games: MutableMapping[int, ProcessGame]
     event_queue: deque[AbstractEvent]
 
     async def start_game(self, game_id: int) -> None:
@@ -36,6 +36,7 @@ class GameStore:
             created_at=datetime.now(tz=UTC),
             event_queue=self.event_queue,
             session_controller=self.current_games[game_id].session_controller,
+            game_storage=self.game_storage,
         )
         self.event_queue.append(event)
         log.info("Game was %s started", game_id)
@@ -45,7 +46,7 @@ class GameStore:
         game: Game,
         event_queue: deque[AbstractEvent],
     ) -> None:
-        self.current_games[game.id] = MasterGame(
+        self.current_games[game.id] = ProcessGame(
             game=game,
             event_queue=event_queue,
             session_controller=SessionController(sessions=SESSIONS),

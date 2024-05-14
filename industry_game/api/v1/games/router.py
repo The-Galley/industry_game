@@ -4,8 +4,9 @@ from fastapi import APIRouter, Depends, HTTPException, Query
 
 from industry_game.api.v1.games.lobby import router as lobby_router
 from industry_game.db.models import GameStatus
+from industry_game.utils.games.controller import GameController
 from industry_game.utils.games.models import (
-    Game,
+    GameModel,
     GamePaginationModel,
     NewGameModel,
     UpdateGameModel,
@@ -13,7 +14,7 @@ from industry_game.utils.games.models import (
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.jwt import REQUIRE_ADMIN_AUTH, REQUIRE_AUTH
 from industry_game.utils.http.models import StatusResponse
-from industry_game.utils.overrides import GetGameStorage
+from industry_game.utils.overrides import GetGameController, GetGameStorage
 from industry_game.utils.users.base import AuthUser, UserType
 
 router = APIRouter(prefix="/games", tags=["games"])
@@ -55,7 +56,7 @@ async def create_game(
     new_game: NewGameModel,
     game_storage: GameStorage = Depends(GetGameStorage),
     auth_user: AuthUser = Depends(REQUIRE_ADMIN_AUTH),
-) -> None:
+) -> GameModel:
     return await game_storage.create(
         name=new_game.name,
         description=new_game.description,
@@ -64,17 +65,17 @@ async def create_game(
 
 
 @router.get("/{game_id}/", dependencies=[Depends(REQUIRE_AUTH)])
-async def read_game(
+async def read_game_by_id(
     game_id: int,
     game_storage: GameStorage = Depends(GetGameStorage),
-) -> Game:
+) -> GameModel:
     game = await game_storage.get_by_id(game_id=game_id)
     if game is None:
         raise HTTPException(
             status_code=HTTPStatus.NOT_FOUND,
             detail="Game not found",
         )
-    return game
+    return GameModel.model_validate(game)
 
 
 @router.post("/{game_id}/", dependencies=[Depends(REQUIRE_ADMIN_AUTH)])
@@ -82,7 +83,7 @@ async def update_game(
     game_id: int,
     update_game: UpdateGameModel,
     game_storage: GameStorage = Depends(GetGameStorage),
-) -> Game:
+) -> GameModel:
     if not update_game.name and not update_game.description:
         raise HTTPException(
             status_code=HTTPStatus.BAD_REQUEST,
@@ -98,9 +99,13 @@ async def update_game(
             status_code=HTTPStatus.NOT_FOUND,
             detail="Game not found",
         )
-    return game
+    return GameModel.model_validate(game)
 
 
-@router.post("/{game_id}/start")
-async def start_game() -> None:
-    pass
+@router.post("/{game_id}/start", dependencies=[Depends(REQUIRE_ADMIN_AUTH)])
+async def start_game(
+    game_id: int,
+    game_controller: GameController = Depends(GetGameController),
+) -> StatusResponse:
+    await game_controller.start_game(game_id=game_id)
+    return StatusResponse(message=f"Game {game_id} was started")

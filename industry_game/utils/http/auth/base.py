@@ -28,7 +28,7 @@ class AuthManager:
         auth_user = await self.auth_provider.authorize(request)
         if auth_user is None:
             raise HTTPException(
-                status_code=HTTPStatus.FORBIDDEN,
+                status_code=HTTPStatus.UNAUTHORIZED,
                 detail="Required authorization",
             )
         if user_type is not None and auth_user.type != user_type:
