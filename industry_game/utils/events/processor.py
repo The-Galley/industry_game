@@ -17,16 +17,16 @@ log = logging.getLogger(__name__)
 class EventProcessor:
     event_storage: EventStorage
 
-    async def process_event(self, event: AbstractEvent) -> None:
+    async def execute_event(self, event: AbstractEvent) -> None:
         try:
-            if isinstance(event, BuildingEvent):
-                await event.hook()
-            elif isinstance(event, ProductionEvent):
-                await event.hook()
-            elif isinstance(event, GamePauseEvent):
-                await event.hook()
-            elif isinstance(event, GameContinueEvent):
-                await event.hook()
+            if isinstance(
+                event,
+                BuildingEvent
+                | ProductionEvent
+                | GamePauseEvent
+                | GameContinueEvent,
+            ):
+                await event.execute()
             else:
                 log.exception(
                     "Catch unkwnown event type of event %s",
@@ -37,6 +37,6 @@ class EventProcessor:
             log.exception("Catch unhandled exception")
         else:
             await self.event_storage.update_status(
-                event_uuid=event.uuid,
+                event_uuid=event._uuid,
                 status=EventStatus.FINISHED,
             )

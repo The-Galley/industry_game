@@ -6,20 +6,20 @@ from sqlalchemy.ext.asyncio import AsyncSession
 from industry_game.db.models import User as UserDb
 from industry_game.db.models import UserGameLobby as UserGameLobbyDb
 from industry_game.utils.db import AbstractStorage, inject_session
-from industry_game.utils.lobby.models import Lobby, LobbyPagination
+from industry_game.utils.lobby.models import LobbyModel, LobbyPaginationModel
 from industry_game.utils.pagination import MetaPagination
-from industry_game.utils.users.models import ShortUser
+from industry_game.utils.users.models import ShortUserModel
 
 
 class LobbyStorage(AbstractStorage):
     async def pagination(
         self, game_id: int, page: int, page_size: int
-    ) -> LobbyPagination:
+    ) -> LobbyPaginationModel:
         total, items = await asyncio.gather(
             self.count(),
             self.get_items(game_id=game_id, page=page, page_size=page_size),
         )
-        return LobbyPagination(
+        return LobbyPaginationModel(
             meta=MetaPagination.create(
                 total=total,
                 page=page,
@@ -35,12 +35,12 @@ class LobbyStorage(AbstractStorage):
         *,
         game_id: int,
         user_id: int,
-    ) -> Lobby | None:
+    ) -> LobbyModel | None:
         obj = await session.get(
             UserGameLobbyDb,
             ident={"game_id": game_id, "user_id": user_id},
         )
-        return Lobby.from_model(obj) if obj else None
+        return LobbyModel.model_validate(obj) if obj else None
 
     @inject_session
     async def add_user(
@@ -82,7 +82,7 @@ class LobbyStorage(AbstractStorage):
     @inject_session
     async def get_items(
         self, session: AsyncSession, game_id: int, page: int, page_size: int
-    ) -> list[ShortUser]:
+    ) -> list[ShortUserModel]:
         query = (
             select(UserDb)
             .join(UserGameLobbyDb, UserDb.id == UserGameLobbyDb.user_id)
@@ -92,7 +92,7 @@ class LobbyStorage(AbstractStorage):
         )
 
         games = await session.scalars(query)
-        items: list[ShortUser] = []
+        items: list[ShortUserModel] = []
         for game in games:
-            items.append(ShortUser.from_model(game))
+            items.append(ShortUserModel.model_validate(game))
         return items

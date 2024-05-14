@@ -3,7 +3,7 @@ from http import HTTPStatus
 from aiohttp.test_utils import TestClient
 from aiomisc_pytest import TCPProxy
 
-API_URL = "/api/v1/ping/"
+API_URL = "/api/v1/monitoring/ping/"
 
 
 async def test_ping_db_ok_status(api_client: TestClient) -> None:

@@ -11,10 +11,10 @@ from yarl import URL
 
 from industry_game.services.rest import REST
 from industry_game.utils.games.storage import GameStorage
-from industry_game.utils.http.auth.base import BaseAuthorizationProvider
+from industry_game.utils.http.auth.base import AuthManager, IAuthProvider
 from industry_game.utils.lobby.storage import LobbyStorage
-from industry_game.utils.users.processor import PlayerProcessor
-from industry_game.utils.users.storage import PlayerStorage
+from industry_game.utils.users.providers import LoginProvider
+from industry_game.utils.users.storage import UserStorage
 
 
 @pytest.fixture
@@ -32,10 +32,11 @@ def rest_service(
     sio: socketio.AsyncServer,
     game_storage: GameStorage,
     lobby_storage: LobbyStorage,
-    player_storage: PlayerStorage,
-    player_processor: PlayerProcessor,
-    authorization_provider: BaseAuthorizationProvider,
+    user_storage: UserStorage,
+    login_provider: LoginProvider,
+    auth_provider: IAuthProvider,
     session_factory: async_sessionmaker[AsyncSession],
+    auth_manager: AuthManager,
 ) -> REST:
     return REST(
         address=rest_url.host,
@@ -43,12 +44,17 @@ def rest_service(
         sio=sio,
         game_storage=game_storage,
         lobby_storage=lobby_storage,
-        player_storage=player_storage,
-        player_processor=player_processor,
-        authorization_provider=authorization_provider,
+        user_storage=user_storage,
+        login_provider=login_provider,
+        auth_provider=auth_provider,
         session_factory=session_factory,
+        auth_manager=auth_manager,
         access_allow_origins=[URL("https://example.com")],
         cors_max_age=3600,
+        debug=False,
+        project_title="Test",
+        project_description="Test description",
+        project_version="1.0.0",
     )
 
 

@@ -4,7 +4,7 @@ pytest_plugins = (
     "tests.plugins.factories.games",
     "tests.plugins.factories.users",
     "tests.plugins.games",
-    "tests.plugins.jwt_auth",
+    "tests.plugins.auth",
     "tests.plugins.lobby",
     "tests.plugins.rest",
     "tests.plugins.security",

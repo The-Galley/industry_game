@@ -1,7 +1,6 @@
 import logging
 
 from aiomisc import Service, entrypoint
-from yarl import URL
 
 from industry_game.args import parser
 from industry_game.deps import config_deps
@@ -18,11 +17,10 @@ def main() -> None:
         REST(
             address=args.api_address,
             port=args.api_port,
-            access_allow_origins=[
-                URL("http://127.0.0.1"),
-                URL("http://localhost:8080"),
-            ],
-            cors_max_age=3600,
+            debug=args.debug,
+            project_title=args.project_title,
+            project_description=args.project_description,
+            project_version=args.project_version,
         ),
     ]
 

@@ -1,15 +1,19 @@
+from collections import deque
+from dataclasses import dataclass
 from datetime import datetime
-from typing import Annotated
+from typing import Annotated, Self
 
-import msgspec
-from pydantic import BaseModel, StringConstraints
+from pydantic import BaseModel, ConfigDict, StringConstraints
 
 from industry_game.db.models import Game as GameDb
 from industry_game.db.models import GameStatus
+from industry_game.utils.events.base import AbstractEvent
+from industry_game.utils.games.session import SessionController
 from industry_game.utils.pagination import MetaPagination
 
 
-class Game(msgspec.Struct, frozen=True):
+@dataclass(frozen=True)
+class Game:
     id: int
     name: str
     description: str
@@ -17,16 +21,12 @@ class Game(msgspec.Struct, frozen=True):
     status: GameStatus
     started_at: datetime | None
     finished_at: datetime | None
-    created_at: Annotated[datetime, msgspec.Meta(tz=False)]
-    updated_at: Annotated[datetime, msgspec.Meta(tz=False)]
-
-    @property
-    def is_paused(self) -> bool:
-        return self.status == GameStatus.PAUSED
+    created_at: datetime
+    updated_at: datetime
 
     @classmethod
-    def from_model(cls, obj: GameDb) -> "Game":
-        return Game(
+    def from_model(cls, obj: GameDb) -> Self:
+        return cls(
             id=obj.id,
             name=obj.name,
             description=obj.description,
@@ -39,9 +39,25 @@ class Game(msgspec.Struct, frozen=True):
         )
 
 
-class GamePagination(msgspec.Struct, frozen=True):
+class GameModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
+    id: int
+    name: str
+    description: str
+    created_by_id: int
+    status: GameStatus
+    started_at: datetime | None
+    finished_at: datetime | None
+    created_at: datetime
+    updated_at: datetime
+
+
+class GamePaginationModel(BaseModel):
+    model_config = ConfigDict(from_attributes=True)
+
     meta: MetaPagination
-    items: list[Game]
+    items: list[GameModel]
 
 
 class NewGameModel(BaseModel):
@@ -60,3 +76,13 @@ class UpdateGameModel(BaseModel):
     description: Annotated[
         str, StringConstraints(strip_whitespace=True, max_length=512)
     ] | None = None
+
+
+class ProcessGame:
+    def __init__(
+        self,
+        game: Game,
+        event_queue: deque[AbstractEvent],
+        session_controller: SessionController,
+    ) -> None:
+        pass

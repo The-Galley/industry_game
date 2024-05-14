@@ -2,30 +2,30 @@ import pytest
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 
 from industry_game.db.models import User as UserDb
-from industry_game.utils.http.auth.jwt import JwtAuthrorizationProvider
+from industry_game.utils.http.auth.jwt import JwtAuthProvider
 from industry_game.utils.security import Passgen
 from industry_game.utils.users.base import AuthUser, UserType
-from industry_game.utils.users.processor import PlayerProcessor
-from industry_game.utils.users.storage import PlayerStorage
+from industry_game.utils.users.providers import LoginProvider
+from industry_game.utils.users.storage import UserStorage
 
 
 @pytest.fixture
-def player_storage(
+def user_storage(
     session_factory: async_sessionmaker[AsyncSession],
-) -> PlayerStorage:
-    return PlayerStorage(session_factory=session_factory)
+) -> UserStorage:
+    return UserStorage(session_factory=session_factory)
 
 
 @pytest.fixture
-def player_processor(
-    player_storage: PlayerStorage,
-    authorization_provider: JwtAuthrorizationProvider,
+def login_provider(
+    user_storage: UserStorage,
+    auth_provider: JwtAuthProvider,
     passgen: Passgen,
-) -> PlayerProcessor:
-    return PlayerProcessor(
-        player_storage=player_storage,
+) -> LoginProvider:
+    return LoginProvider(
+        user_storage=user_storage,
         passgen=passgen,
-        authorization_provider=authorization_provider,
+        auth_provider=auth_provider,
     )
 
 
