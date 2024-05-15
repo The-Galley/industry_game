@@ -3,10 +3,13 @@ from http import HTTPMethod
 
 from aiomisc.service.uvicorn import UvicornApplication, UvicornService
 from fastapi import FastAPI, HTTPException
+from fastapi.staticfiles import StaticFiles
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from starlette.middleware.cors import CORSMiddleware
 
 from industry_game.api.router import router as api_router
+from industry_game.utils.buildings.storage import BuildingStorage
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.base import AuthManager
 from industry_game.utils.http.auth.jwt import (
@@ -18,10 +21,12 @@ from industry_game.utils.http.auth.jwt import (
 from industry_game.utils.http.exceptions.handlers import http_exception_handler
 from industry_game.utils.lobby.storage import LobbyStorage
 from industry_game.utils.overrides import (
+    GetBuildingStorage,
     GetGameStorage,
     GetLobbyStorage,
     GetLoginProvider,
     GetSessionFactory,
+    GetTemplates,
     GetUserStorage,
 )
 from industry_game.utils.users.providers import LoginProvider
@@ -44,6 +49,7 @@ class REST(UvicornService):
         "user_storage",
         "game_storage",
         "lobby_storage",
+        "building_storage",
     )
     EXCEPTION_HANDLERS: ExceptionHandlersType = (
         (HTTPException, http_exception_handler),
@@ -60,6 +66,8 @@ class REST(UvicornService):
     user_storage: UserStorage
     game_storage: GameStorage
     lobby_storage: LobbyStorage
+    building_storage: BuildingStorage
+    templates: Jinja2Templates
 
     async def create_application(self) -> UvicornApplication:
         app = FastAPI(
@@ -75,7 +83,7 @@ class REST(UvicornService):
         self._add_routes(app)
         self._add_exceptions(app)
         self._add_dependency_overrides(app)
-        self._add_socket_io(app)
+        self._add_static(app)
         return app
 
     def _add_middlewares(self, app: FastAPI) -> None:
@@ -112,8 +120,10 @@ class REST(UvicornService):
                 GetLoginProvider: lambda: self.login_provider,
                 GetGameStorage: lambda: self.game_storage,
                 GetLobbyStorage: lambda: self.lobby_storage,
+                GetBuildingStorage: lambda: self.building_storage,
+                GetTemplates: lambda: self.templates,
             }
         )
 
-    def _add_socket_io(self, app: FastAPI) -> None:
-        pass
+    def _add_static(self, app: FastAPI) -> None:
+        app.mount("/static", StaticFiles(directory="static"), name="static")

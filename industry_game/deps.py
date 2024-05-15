@@ -1,10 +1,11 @@
 from argparse import Namespace
 from collections.abc import AsyncGenerator
 
-import socketio
 from aiomisc_dependency import dependency
+from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from industry_game.utils.buildings.storage import BuildingStorage
 from industry_game.utils.db import (
     create_async_engine,
     create_async_session_factory,
@@ -58,8 +59,10 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
         return UserStorage(session_factory=session_factory)
 
     @dependency
-    def sio() -> socketio.AsyncServer:
-        return socketio.AsyncServer(async_mode="aiohttp")
+    def building_storage(
+        session_factory: async_sessionmaker[AsyncSession],
+    ) -> BuildingStorage:
+        return BuildingStorage(session_factory=session_factory)
 
     @dependency
     def jwt_processor() -> JwtProcessor:
@@ -95,3 +98,7 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
             passgen=passgen,
             auth_provider=auth_provider,
         )
+
+    @dependency
+    def templates() -> Jinja2Templates:
+        return Jinja2Templates(directory="./templates")

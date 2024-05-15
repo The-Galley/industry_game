@@ -1,7 +1,6 @@
 from collections.abc import AsyncIterator, Mapping, Sequence
 
 import pytest
-import socketio
 from aiohttp import hdrs
 from aiohttp.test_utils import TestClient, TestServer
 from aiohttp.web_app import Application
@@ -29,7 +28,6 @@ def rest_url(localhost: str, aiomisc_unused_port_factory) -> URL:
 @pytest.fixture
 def rest_service(
     rest_url: URL,
-    sio: socketio.AsyncServer,
     game_storage: GameStorage,
     lobby_storage: LobbyStorage,
     user_storage: UserStorage,
@@ -41,7 +39,6 @@ def rest_service(
     return REST(
         address=rest_url.host,
         port=rest_url.port,
-        sio=sio,
         game_storage=game_storage,
         lobby_storage=lobby_storage,
         user_storage=user_storage,

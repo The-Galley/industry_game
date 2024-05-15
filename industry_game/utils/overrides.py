@@ -25,6 +25,14 @@ class GetLoginProvider:
     pass
 
 
+class GetBuildingStorage:
+    pass
+
+
+class GetTemplates:
+    pass
+
+
 class MaybeAuth(APIKeyHeader):
     pass
 

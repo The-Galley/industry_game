@@ -7,7 +7,7 @@ license = "MIT"
 readme = "README.md"
 
 [tool.poetry.dependencies]
-python = "^3.11"
+python = "^3.12"
 aiomisc = {extras = ["asgi", "cron", "uvicorn"], version = "^17.5.4"}
 sqlalchemy = "^2.0.25"
 alembic = "^1.13.1"

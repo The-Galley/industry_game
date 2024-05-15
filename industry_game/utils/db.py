@@ -33,19 +33,22 @@ TClass = TypeVar("TClass", bound=AbstractStorage)
 TReturn = TypeVar("TReturn")
 TParams = ParamSpec("TParams")
 
+TFunc = Callable[
+    Concatenate[TClass, TParams],
+    Coroutine[Any, Any, TReturn],
+]
 
-def inject_session(
-    func: Callable[
-        Concatenate[TClass, AsyncSession, TParams],
-        Coroutine[Any, Any, TReturn],
-    ],
-) -> Callable[Concatenate[TClass, TParams], Coroutine[Any, Any, TReturn]]:
+
+def inject_session(func: TFunc) -> TFunc:
     @wraps(func)
     async def wrapper(
         self: TClass, *args: TParams.args, **kwargs: TParams.kwargs
     ) -> TReturn:
+        if "session" in kwargs:
+            return await func(self, *args, **kwargs)
         async with self.session_factory() as session:
-            return await func(self, session, *args, **kwargs)
+            kwargs["session"] = session
+            return await func(self, *args, **kwargs)
 
     return wrapper
 

@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Sequence
 
 from sqlalchemy import delete, func, insert, select
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -8,23 +9,21 @@ from industry_game.db.models import UserGameLobby as UserGameLobbyDb
 from industry_game.utils.db import AbstractStorage, inject_session
 from industry_game.utils.lobby.models import LobbyModel, LobbyPaginationModel
 from industry_game.utils.pagination import MetaPagination
-from industry_game.utils.users.models import ShortUserModel
 
 
 class LobbyStorage(AbstractStorage):
     async def pagination(
-        self, game_id: int, page: int, page_size: int
+        self,
+        game_id: int,
+        limit: int,
+        offset: int,
     ) -> LobbyPaginationModel:
         total, items = await asyncio.gather(
             self.count(),
-            self.get_items(game_id=game_id, page=page, page_size=page_size),
+            self.get_items(game_id=game_id, limit=limit, offset=offset),
         )
         return LobbyPaginationModel(
-            meta=MetaPagination.create(
-                total=total,
-                page=page,
-                page_size=page_size,
-            ),
+            meta=MetaPagination(total=total),
             items=items,
         )
 
@@ -75,24 +74,24 @@ class LobbyStorage(AbstractStorage):
             await session.commit()
 
     @inject_session
-    async def count(self, session: AsyncSession) -> int:
+    async def count(self, *, session: AsyncSession) -> int:
         query = select(func.count()).select_from(UserGameLobbyDb)
         return (await session.execute(query)).scalar_one()
 
     @inject_session
     async def get_items(
-        self, session: AsyncSession, game_id: int, page: int, page_size: int
-    ) -> list[ShortUserModel]:
+        self,
+        *,
+        session: AsyncSession,
+        game_id: int,
+        limit: int,
+        offset: int,
+    ) -> Sequence[UserDb]:
         query = (
             select(UserDb)
             .join(UserGameLobbyDb, UserDb.id == UserGameLobbyDb.user_id)
             .where(UserGameLobbyDb.game_id == game_id)
-            .limit(page_size)
-            .offset((page - 1) * page_size)
+            .limit(limit)
+            .offset(offset)
         )
-
-        games = await session.scalars(query)
-        items: list[ShortUserModel] = []
-        for game in games:
-            items.append(ShortUserModel.model_validate(game))
-        return items
+        return (await session.scalars(query)).all()

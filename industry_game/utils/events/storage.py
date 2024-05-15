@@ -27,6 +27,7 @@ class EventStorage(AbstractStorage):
         *,
         commit: bool = True,
     ) -> Event:
+        session.scalar()
         stmt = (
             insert(Event)
             .values(

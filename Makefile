@@ -1,4 +1,4 @@
-PYTHON_VERSION = 3.11
+PYTHON_VERSION = 3.12
 PROJECT_PATH = ./industry_game/
 TEST_PATH = ./tests/
 
@@ -7,8 +7,6 @@ HELP_FUN = \
 	if/^([\w-_]+)\s*:.*\#\#(?:@(\w+))?\s(.*)$$/}; \
     print"$$_:\n", map"  $$_->[0]".(" "x(20-length($$_->[0])))."$$_->[1]\n",\
     @{$$help{$$_}},"\n" for keys %help; \
-
-PYTHON_VERSION ?= 3.11
 
 help: ##@Help Show this help
 	@echo -e "Usage: make [target] ...\n"
@@ -22,6 +20,7 @@ develop: clean_dev  ##@Develop Create project venv
 	.venv/bin/pip install -U pip poetry
 	.venv/bin/poetry config virtualenvs.create false
 	.venv/bin/poetry install
+	.venv/bin/pre-commit install
 
 local:  ##@Develop Run db and rabbitmq containers
 	docker-compose -f docker-compose.dev.yaml up --force-recreate --renew-anon-volumes --build

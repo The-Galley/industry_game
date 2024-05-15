@@ -1,6 +1,7 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, HTTPException, Query
+from fastapi import APIRouter, Depends, HTTPException
+from pydantic import Field
 
 from industry_game.api.v1.games.lobby import router as lobby_router
 from industry_game.db.models import GameStatus
@@ -23,20 +24,17 @@ router.include_router(lobby_router)
 
 @router.get("/")
 async def list_games(
-    page: int = Query(default=1, ge=1, title="Page number"),
-    page_size: int = Query(default=20, ge=1, le=100, title="Page size"),
+    limit: int = Field(default=20, gt=0, le=100),
+    offset: int = Field(default=0, gt=-1),
     auth_user: AuthUser = Depends(REQUIRE_AUTH),
     game_storage: GameStorage = Depends(GetGameStorage),
 ) -> GamePaginationModel:
     if auth_user.type == UserType.ADMIN:
-        pagination = await game_storage.pagination(
-            page=page,
-            page_size=page_size,
-        )
+        pagination = await game_storage.pagination(limit=limit, offset=offset)
     else:
         pagination = await game_storage.pagination(
-            page=page,
-            page_size=page_size,
+            limit=limit,
+            offset=offset,
             status=GameStatus.CREATED,
         )
     return pagination

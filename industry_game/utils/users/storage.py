@@ -72,22 +72,20 @@ class UserStorage(AbstractStorage):
         return User.from_model(obj) if obj else None
 
     async def pagination(
-        self, page: int, page_size: int
+        self,
+        limit: int,
+        offset: int,
     ) -> UserPaginationModel:
         total, items = await asyncio.gather(
             self._get_count(user_type=UserType.PLAYER),
             self._get_items(
                 user_type=UserType.PLAYER,
-                page=page,
-                page_size=page_size,
+                limt=limit,
+                offset=offset,
             ),
         )
         return UserPaginationModel(
-            meta=MetaPagination.create(
-                total=total,
-                page=page,
-                page_size=page_size,
-            ),
+            meta=MetaPagination(total=total),
             items=items,
         )
 
@@ -107,17 +105,14 @@ class UserStorage(AbstractStorage):
         self,
         session: AsyncSession,
         user_type: UserType,
-        page: int,
-        page_size: int,
-    ) -> Sequence[User]:
+        limit: int,
+        offset: int,
+    ) -> Sequence[UserDb]:
         query = (
             select(UserDb)
             .where(UserDb.type == user_type)
-            .limit(page_size)
-            .offset((page - 1) * page_size)
+            .limit(limit)
+            .offset(offset)
+            .order_by(UserDb.id)
         )
-        players = await session.scalars(query)
-        items: list[User] = []
-        for player in players:
-            items.append(User.from_model(player))
-        return items
+        return (await session.scalars(query)).all()

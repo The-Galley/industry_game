@@ -1,7 +1,8 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Query, Response
+from fastapi import APIRouter, Depends, Response
 from fastapi.exceptions import HTTPException
+from pydantic import Field
 
 from industry_game.utils.exceptions import UserWithUsernameAlreadExistsException
 from industry_game.utils.http.auth.jwt import (
@@ -31,13 +32,13 @@ router = APIRouter(tags=["users"], prefix="/users")
 
 @router.get("/", dependencies=[Depends(REQUIRE_ADMIN_AUTH)])
 async def list_users(
-    page: int = Query(default=1, ge=1, title="Page number"),
-    page_size: int = Query(default=20, ge=1, le=100, title="Page size"),
+    limit: int = Field(default=20, gt=0, le=100),
+    offset: int = Field(default=0, gt=-1),
     user_storage: UserStorage = Depends(GetUserStorage),
 ) -> UserPaginationModel:
     return await user_storage.pagination(
-        page=page,
-        page_size=page_size,
+        limit=limit,
+        offset=offset,
     )
 
 
