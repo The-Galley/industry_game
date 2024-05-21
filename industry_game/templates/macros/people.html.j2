@@ -1,0 +1,37 @@
+{% macro people(people) %}
+
+<div class="row">
+  <div class="col s12">
+    <h4>Население</h4>
+    <table class="highlight">
+    <thead>
+      <td>
+        Вид работников
+      </td>
+      <td>
+        Состояние
+      </td>
+      <td>
+        Кол-во
+      </td>
+    </thead>
+    {% for type, h_value in people.value.items() %}
+      {% for state, amount in h_value.items() %}
+      <tr>
+        <td>
+          {{ type }}
+        </td>
+        <td>
+          {{ state }}
+        </td>
+        <td>
+          {{ amount }}
+        </td>
+      </tr>
+      {% endfor %}
+    {% endfor %}
+    </table>
+  </div>
+</div>
+
+{%- endmacro %}

@@ -1,0 +1,56 @@
+{% extends "./base.html.j2" %}
+
+{% import "./macros/approves.html.j2" as approves %}
+{% import "./macros/build.html.j2" as build %}
+{% import "./macros/map.html.j2" as map %}
+{% import "./macros/balance.html.j2" as balance %}
+{% import "./macros/notifications.html.j2" as notifications %}
+{% import "./macros/people.html.j2" as people %}
+
+{% block title %}Play{% endblock title %}
+
+{% block content %}
+<div class="row">
+  <div class="col s12">
+    <h3>Игра: <b>{{ game.name }}</b></h1>
+    <p>Описание: <b>{{ game.description }}</b></p>
+    <h3>Дистрикт: <b>{{ district.name }}</b></h1>
+    <h3>Роль: <b>{{ player.role }}</b></h2>
+    <h3>Сессия: <b>{{ game.session_controller.current_session }}</b></h3>
+  </div>
+</div>
+
+{{ notifications.notifications(player.notifications)}}
+
+{# {% if player.role == "DIRECTOR" or player.role == "FINANCIER" %} #}
+
+{{ approves.approves(apprvs) }}
+
+{# {% endif %} #}
+
+{# {% if player.role == "DIRECTOR" or player.role == "TERRITORY_MANAGER" or player.role == "DEVELOPER" %} #}
+
+{{ map.table_map(game.map, district.id) }}
+
+{# {% endif %} #}
+
+{# {% if player.role != "TERRITORY_MANAGER" %} #}
+
+{{ balance.balance(district.balance) }}
+
+{# {% endif %} #}
+
+{# {% if player.role == "DEVELOPER" %} #}
+
+{{ build.build() }}
+
+{# {% endif %} #}
+
+{# {% if player.role == "HR_MANAGER"  or player.role == "DEVELOPER" or player.role == "DIRECTOR" %} #}
+
+{{ people.people(district.people) }}
+
+{# {% endif %} #}
+
+
+{% endblock content %}

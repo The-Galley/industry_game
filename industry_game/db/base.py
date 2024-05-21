@@ -1,7 +1,7 @@
 import re
-from datetime import datetime
+from datetime import UTC, datetime
 
-from sqlalchemy import DateTime, MetaData, func
+from sqlalchemy import DateTime, MetaData, text
 from sqlalchemy.orm import (
     Mapped,
     as_declarative,
@@ -41,16 +41,17 @@ class TimestampMixin:
     @classmethod
     def created_at(cls) -> Mapped[datetime]:
         return mapped_column(
-            DateTime(timezone=True), server_default=func.utcnow()
+            DateTime(timezone=True),
+            server_default=text("timezone('utc', now())"),
         )
 
     @declared_attr
     def updated_at(cls) -> Mapped[datetime]:
         return mapped_column(
             DateTime(timezone=True),
-            server_default=func.utcnow(),
-            server_onupdate=func.utcnow(),  # type:ignore[arg-type]
-            onupdate=datetime.utcnow,
+            server_default=text("timezone('utc', now())"),
+            server_onupdate=text("timezone('utc', now())"),  # type:ignore[arg-type]
+            onupdate=lambda: datetime.now(tz=UTC),
         )
 
 

@@ -1,0 +1,30 @@
+{% macro balance(balance) %}
+
+<div class="row">
+  <div class="col s12">
+    <h3>Ресурсы</h3>
+    <table class="highlight">
+    <thead>
+      <td>
+        Ресурс
+      </td>
+      <td>
+        Кол-во
+      </td>
+    </thead>
+    {% for resource in balance.resources %}
+    <tr>
+      <td>
+        {{ resource.icon }} {{ resource.type }}
+      </td>
+      <td>
+        {{ resource.amount }}
+      </td>
+    </tr>
+
+    {% endfor %}
+    </table>
+  </div>
+</div>
+
+{%- endmacro %}

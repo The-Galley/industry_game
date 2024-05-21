@@ -1,0 +1,22 @@
+{% macro build() %}
+<div class="row">
+  <div class="card blue lighten-5">
+  <div class="card-content black-text">
+    <form>
+    <span class="card-title">Построить здание</span>
+      <div class="row">
+        <div class="input-field col s6">
+          <input placeholder="Building ID" id="building_id" type="text" class="validate">
+          <label for="building_id">Building ID</label>
+        </div>
+      </div>
+      <div class="row">
+        <div class="input-field col s6">
+          <input class="btn" id="submit_approve" type="submit" value="Подтвердить">
+        </div>
+      </div>
+    </form>
+  </div>
+  </div>
+</div>
+{% endmacro %}

@@ -1,0 +1,2 @@
+class ApproveNotFoundException(Exception):
+    pass

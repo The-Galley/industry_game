@@ -1,15 +1,20 @@
 from argparse import Namespace
+from collections import deque
 from collections.abc import AsyncGenerator
+from pathlib import Path
 
 from aiomisc_dependency import dependency
 from fastapi.templating import Jinja2Templates
 from sqlalchemy.ext.asyncio import AsyncEngine, AsyncSession, async_sessionmaker
 
+from industry_game.init_data import create_game
 from industry_game.utils.buildings.storage import BuildingStorage
 from industry_game.utils.db import (
     create_async_engine,
     create_async_session_factory,
 )
+from industry_game.utils.events.base import AbstractEvent
+from industry_game.utils.games.controller import GameController
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.base import AuthManager, IAuthProvider
 from industry_game.utils.http.auth.jwt import (
@@ -22,6 +27,8 @@ from industry_game.utils.rsa import stringify_public_key
 from industry_game.utils.security import Passgen
 from industry_game.utils.users.providers import LoginProvider
 from industry_game.utils.users.storage import UserStorage
+
+PROJECT_ROOT = Path(__file__).parent.resolve()
 
 
 def config_deps(args: Namespace) -> None:  # noqa: C901
@@ -101,4 +108,21 @@ def config_deps(args: Namespace) -> None:  # noqa: C901
 
     @dependency
     def templates() -> Jinja2Templates:
-        return Jinja2Templates(directory="./templates")
+        return Jinja2Templates(directory=PROJECT_ROOT / "templates")
+
+    @dependency
+    def event_queue() -> deque[AbstractEvent]:
+        return deque()
+
+    @dependency
+    def game_controller(
+        game_storage: GameStorage,
+        event_queue: deque[AbstractEvent],
+    ) -> GameController:
+        return GameController(
+            game_storage=game_storage,
+            current_games={
+                1: create_game(),
+            },
+            event_queue=event_queue,
+        )

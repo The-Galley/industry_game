@@ -9,6 +9,7 @@ from sqlalchemy.ext.asyncio import AsyncSession, async_sessionmaker
 from yarl import URL
 
 from industry_game.services.rest import REST
+from industry_game.utils.buildings.storage import BuildingStorage
 from industry_game.utils.games.storage import GameStorage
 from industry_game.utils.http.auth.base import AuthManager, IAuthProvider
 from industry_game.utils.lobby.storage import LobbyStorage
@@ -31,6 +32,7 @@ def rest_service(
     game_storage: GameStorage,
     lobby_storage: LobbyStorage,
     user_storage: UserStorage,
+    building_storage: BuildingStorage,
     login_provider: LoginProvider,
     auth_provider: IAuthProvider,
     session_factory: async_sessionmaker[AsyncSession],
@@ -42,6 +44,7 @@ def rest_service(
         game_storage=game_storage,
         lobby_storage=lobby_storage,
         user_storage=user_storage,
+        building_storage=building_storage,
         login_provider=login_provider,
         auth_provider=auth_provider,
         session_factory=session_factory,

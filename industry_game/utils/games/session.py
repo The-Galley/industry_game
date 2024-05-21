@@ -5,11 +5,12 @@ from dataclasses import dataclass
 @dataclass(frozen=True)
 class Session:
     duration_seconds: int
-    pause_seconds: int | None
+    title: str
+    pause_seconds: int
+    is_last: bool = False
 
-    @property
-    def is_last(self) -> bool:
-        return self.pause_seconds is None
+    def __str__(self) -> str:
+        return self.title
 
 
 class SessionController:
@@ -38,41 +39,52 @@ class SessionController:
 
 SESSIONS = (
     Session(  # 1
-        duration_seconds=10 * 60, pause_seconds=0
+        duration_seconds=10 * 60, pause_seconds=0, title="Первая"
     ),
     Session(  # 2
-        duration_seconds=10 * 60, pause_seconds=0
+        duration_seconds=10 * 60,
+        pause_seconds=0,
+        title="Вторая",
     ),
     Session(  # 3
         duration_seconds=9 * 60,
         pause_seconds=4 * 60,
+        title="Третья",
     ),
     Session(  # 4
         duration_seconds=9 * 60,
         pause_seconds=0,
+        title="Четвертая",
     ),
     Session(  # 5
         duration_seconds=9 * 60,
         pause_seconds=4 * 60,
+        title="Пятая",
     ),
     Session(  # 6
         duration_seconds=9 * 60,
         pause_seconds=0,
+        title="Шестая",
     ),
     Session(  # 7
         duration_seconds=9 * 60,
         pause_seconds=4 * 60,
+        title="Седьмая",
     ),
     Session(  # 8
         duration_seconds=9 * 60,
         pause_seconds=0,
+        title="Восьмая",
     ),
     Session(  # 9
         duration_seconds=12 * 60,
         pause_seconds=0,
+        title="Девятая",
     ),
     Session(  # 10
         duration_seconds=12 * 60,
         pause_seconds=None,
+        title="Последняя",
+        is_last=True,
     ),
 )

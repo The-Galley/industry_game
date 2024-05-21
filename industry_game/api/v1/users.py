@@ -1,8 +1,7 @@
 from http import HTTPStatus
 
-from fastapi import APIRouter, Depends, Response
+from fastapi import APIRouter, Depends, Query, Response
 from fastapi.exceptions import HTTPException
-from pydantic import Field
 
 from industry_game.utils.exceptions import UserWithUsernameAlreadExistsException
 from industry_game.utils.http.auth.jwt import (
@@ -32,8 +31,8 @@ router = APIRouter(tags=["users"], prefix="/users")
 
 @router.get("/", dependencies=[Depends(REQUIRE_ADMIN_AUTH)])
 async def list_users(
-    limit: int = Field(default=20, gt=0, le=100),
-    offset: int = Field(default=0, gt=-1),
+    limit: int = Query(default=20, gt=0, le=100),
+    offset: int = Query(default=0, gt=-1),
     user_storage: UserStorage = Depends(GetUserStorage),
 ) -> UserPaginationModel:
     return await user_storage.pagination(
@@ -139,3 +138,10 @@ async def register_player(
         )
     response.set_cookie(AUTH_COOKIE, auth_token.token)
     return auth_token
+
+
+@router.get("/logout/", dependencies=[Depends(REQUIRE_AUTH)])
+async def logout(response: Response) -> Response:
+    response.delete_cookie(AUTH_COOKIE)
+    response.status_code = HTTPStatus.NO_CONTENT
+    return response
