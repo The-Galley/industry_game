@@ -51,10 +51,7 @@ async def test_games_list_players_return_only_created_ok(
             }
         ],
         "meta": {
-            "page": 1,
-            "page_size": 20,
             "total": 1,
-            "pages": 1,
         },
     }
 
@@ -94,9 +91,6 @@ async def test_games_list_admins_format_ok(
             for game in sorted([new_game, paused_game], key=lambda x: x.name)
         ],
         "meta": {
-            "page": 1,
-            "page_size": 20,
             "total": 2,
-            "pages": 1,
         },
     }

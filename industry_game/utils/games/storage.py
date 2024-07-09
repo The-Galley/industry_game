@@ -1,4 +1,5 @@
 import asyncio
+from collections.abc import Sequence
 
 from sqlalchemy import func, insert, select, update
 from sqlalchemy.ext.asyncio import AsyncSession
@@ -26,26 +27,23 @@ class GameStorage(AbstractStorage):
 
     async def pagination(
         self,
-        page: int,
-        page_size: int,
+        limit: int,
+        offset: int,
         status: GameStatus | None = None,
     ) -> GamePaginationModel:
         total, items = await asyncio.gather(
             self.count(status=status),
-            self.get_items(page=page, page_size=page_size, status=status),
+            self.get_items(status=status, limit=limit, offset=offset),
         )
         return GamePaginationModel(
-            meta=MetaPagination.create(
-                total=total,
-                page=page,
-                page_size=page_size,
-            ),
+            meta=MetaPagination(total=total),
             items=items,
         )
 
     @inject_session
     async def count(
         self,
+        *,
         session: AsyncSession,
         status: GameStatus | None = None,
     ) -> int:
@@ -58,23 +56,21 @@ class GameStorage(AbstractStorage):
     @inject_session
     async def get_items(
         self,
+        *,
         session: AsyncSession,
-        page: int,
-        page_size: int,
+        limit: int,
+        offset: int,
         status: GameStatus | None = None,
-    ) -> list[Game]:
-        query = select(GameDb).limit(page_size).offset((page - 1) * page_size)
+    ) -> Sequence[GameDb]:
+        query = select(GameDb).limit(limit).offset(offset)
         if status is not None:
             query = query.where(GameDb.status == status)
-        games = await session.scalars(query.order_by(GameDb.name))
-        items: list[Game] = []
-        for game in games:
-            items.append(Game.from_model(game))
-        return items
+        return (await session.scalars(query.order_by(GameDb.name))).all()
 
     @inject_session
     async def create(
         self,
+        *,
         session: AsyncSession,
         name: str,
         description: str,

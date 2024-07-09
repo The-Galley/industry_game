@@ -1,0 +1,25 @@
+{% macro table_map(map, district_id) %}
+<div class="row">
+  <div class="col s12">
+    <h4>Карта</h4>
+    <table class="highlight">
+    {% for row in map.hexagons %}
+
+    <tr>
+    {% for hex in row %}
+      {% if hex.district and hex.district.id == district_id%}
+        <td>{{hex.icon}}</td>
+      {% else %}
+        <td>O</td>
+      {% endif %}
+    {% endfor %}
+    </tr>
+
+    {% endfor %}
+    </table>
+  </div>
+</div>
+
+
+
+{%- endmacro %}

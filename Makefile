@@ -1,5 +1,5 @@
-PYTHON_VERSION = 3.11
-PROJECT_PATH = ./industry_game/
+PYTHON_VERSION = 3.12
+PROJECT_NAME = industry_game
 TEST_PATH = ./tests/
 
 HELP_FUN = \
@@ -7,8 +7,6 @@ HELP_FUN = \
 	if/^([\w-_]+)\s*:.*\#\#(?:@(\w+))?\s(.*)$$/}; \
     print"$$_:\n", map"  $$_->[0]".(" "x(20-length($$_->[0])))."$$_->[1]\n",\
     @{$$help{$$_}},"\n" for keys %help; \
-
-PYTHON_VERSION ?= 3.11
 
 help: ##@Help Show this help
 	@echo -e "Usage: make [target] ...\n"
@@ -22,12 +20,13 @@ develop: clean_dev  ##@Develop Create project venv
 	.venv/bin/pip install -U pip poetry
 	.venv/bin/poetry config virtualenvs.create false
 	.venv/bin/poetry install
+	.venv/bin/pre-commit install
 
 local:  ##@Develop Run db and rabbitmq containers
-	docker-compose -f docker-compose.dev.yaml up --force-recreate --renew-anon-volumes --build
+	docker compose -f docker-compose.dev.yaml up --force-recreate --renew-anon-volumes --build
 
 local-down: ##@Develop Stop containers with delete volumes
-	docker-compose -f docker-compose.dev.yaml down -v
+	docker compose -f docker-compose.dev.yaml down -v
 
 lint-ci: lint-py lint-js ##@Linting Run all linters in CI
 
@@ -48,5 +47,14 @@ bandit: ##@Linting Run bandit
 mypy: ##@Linting Run mypy
 	.venv/bin/mypy --config-file ./pyproject.toml $(PROJECT_PATH)
 
-upgrade-head:
+db-upgrade-head: ##@Database Run db upgrade head
+	.venv/bin/python -m $(PROJECT_NAME).db --pg-dsn=$(APP_PG_DSN) upgrade head
+
+db-downgrade: ##@Database Run db downgrade to previous version
+	.venv/bin/python -m $(PROJECT_NAME).db --pg-dsn=$(APP_PG_DSN) downgrade -1
+
+db-revision: ##@Database Create new revision
+	.venv/bin/python -m $(PROJECT_NAME).db --pg-dsn=$(APP_PG_DSN) revision --autogenerate -m "Initial migration"
+
+docker-db-upgrade-head:
 	docker compose exec rest python -m industry_game.db upgrade head

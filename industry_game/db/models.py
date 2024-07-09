@@ -1,5 +1,5 @@
 from collections.abc import Mapping
-from enum import StrEnum, unique
+from enum import IntEnum, StrEnum, unique
 from typing import Any
 
 from sqlalchemy import ForeignKey, Integer, String
@@ -117,3 +117,43 @@ class UserGameLobby(Base):
 
     user: Mapped[User] = relationship(User)
     game: Mapped[Game] = relationship(Game)
+
+
+@unique
+class BuildingType(StrEnum):
+    PEOPLE_PRODUCTION = "PEOPLE_PRODUCTION"
+    PEOPLE_EDUCATION = "PEOPLE_EDUCATION"
+    RESOURCE_PRODUCTION = "RESOURCE_PRODUCTION"
+    RESOURCE_LOGISTIC = "RESOURCE_LOGISTIC"
+
+
+@unique
+class BuildingLevel(IntEnum):
+    FIRST = 1
+    SECOND = 2
+    THIRD = 3
+
+
+class Building(Base, TimestampMixin):
+    id: Mapped[int] = mapped_column(Integer, primary_key=True)
+    name: Mapped[str] = mapped_column(String(128), nullable=False)
+    type: Mapped[BuildingType] = mapped_column(
+        make_pg_enum(BuildingType, name="building_types"),
+        nullable=False,
+    )
+    description: Mapped[str] = mapped_column(
+        String(512),
+        nullable=False,
+        default="",
+    )
+    icon: Mapped[str | None] = mapped_column(String(256), nullable=True)
+    category: Mapped[str] = mapped_column(String(128), nullable=False)
+    level: Mapped[BuildingLevel] = mapped_column(
+        make_pg_enum(BuildingLevel, name="building_levels"),
+        nullable=False,
+    )
+    properties: Mapped[Mapping[str, Any]] = mapped_column(
+        JSONB(),
+        nullable=False,
+        default="{}",
+    )

@@ -15,7 +15,7 @@ def main() -> None:
 
     services: list[Service] = [
         REST(
-            address=args.api_address,
+            host=args.api_host,
             port=args.api_port,
             debug=args.debug,
             project_title=args.project_title,
@@ -33,7 +33,7 @@ def main() -> None:
     ) as loop:
         log.info(
             "REST service started on address %s:%s",
-            args.api_address,
+            args.api_host,
             args.api_port,
         )
         loop.run_forever()

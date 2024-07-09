@@ -31,13 +31,13 @@ router = APIRouter(tags=["users"], prefix="/users")
 
 @router.get("/", dependencies=[Depends(REQUIRE_ADMIN_AUTH)])
 async def list_users(
-    page: int = Query(default=1, ge=1, title="Page number"),
-    page_size: int = Query(default=20, ge=1, le=100, title="Page size"),
+    limit: int = Query(default=20, gt=0, le=100),
+    offset: int = Query(default=0, gt=-1),
     user_storage: UserStorage = Depends(GetUserStorage),
 ) -> UserPaginationModel:
     return await user_storage.pagination(
-        page=page,
-        page_size=page_size,
+        limit=limit,
+        offset=offset,
     )
 
 
@@ -138,3 +138,10 @@ async def register_player(
         )
     response.set_cookie(AUTH_COOKIE, auth_token.token)
     return auth_token
+
+
+@router.get("/logout/", dependencies=[Depends(REQUIRE_AUTH)])
+async def logout(response: Response) -> Response:
+    response.delete_cookie(AUTH_COOKIE)
+    response.status_code = HTTPStatus.NO_CONTENT
+    return response

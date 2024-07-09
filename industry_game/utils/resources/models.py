@@ -1,7 +1,6 @@
 from dataclasses import dataclass
 from enum import StrEnum, unique
-
-import msgspec
+from functools import cached_property
 
 
 @unique
@@ -17,9 +16,22 @@ class ResourceType(StrEnum):
 @dataclass(frozen=True)
 class Resource:
     type: ResourceType
-    count: int
+    amount: int
 
-
-class ResourceStruct(msgspec.Struct, frozen=True):
-    type: ResourceType
-    count: int
+    @cached_property
+    def icon(self) -> str:
+        match self.type:
+            case ResourceType.METALL:
+                return "🔩"
+            case ResourceType.CHEMICAL:
+                return "🧪"
+            case ResourceType.MACHINE:
+                return "🚜"
+            case ResourceType.LIGHT_INDUSTRY:
+                return "🧵"
+            case ResourceType.FOOD_INDUSTRY:
+                return "🌾"
+            case ResourceType.BITCOIN:
+                return "💰"
+            case _:
+                return "?"

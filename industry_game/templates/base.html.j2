@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+
+<html lang="ru">
+  <head>
+    <meta http-equiv="Content-Type" content="text/html; charset=UTF-8"/>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+    <link rel="icon" type="image/x-icon" href="{{ url_for('static', path='/imgs/ghost.png') }}">
+    <title>{% block title %} {% endblock title %} - Industry Game</title>
+    {% block css %}
+      <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+      <link type="text/css" rel="stylesheet" media="screen,projection" href="{{ url_for('static', path='css/materialize.css') }} "/>
+      <link type="text/css" rel="stylesheet" media="screen,projection" href="{{ url_for('static', path='css/style.css') }}"/>
+    {% endblock css %}
+  </head>
+  <body>
+    <nav class="blue darken-3" role="navigation">
+      <div class="nav-wrapper container">
+        <a id="logo-container" href="#" class="brand-logo">Industry Game</a>
+        <ul class="right hide-on-med-and-down">
+          <li><a href="/docs/swagger">Swagger API</a></li>
+        </ul>
+
+        <ul id="nav-mobile" class="sidenav">
+          <li><a href="/docs/swagger">Swagger API</a></li>
+        </ul>
+        <a href="#" data-target="nav-mobile" class="sidenav-trigger"><i class="material-icons">menu</i></a>
+      </div>
+    </nav>
+    <div class="container">
+      <div class="section">
+    {% block content %}
+    {% endblock content %}
+      </div>
+    </div>
+    <footer class="page-footer orange">
+      <div class="container">
+        <div class="row">
+          <div class="col l6 s12">
+            <h5 class="white-text">Описание проекта</h5>
+            <p class="grey-text text-lighten-4">Это игра</p>
+          </div>
+          <div class="col l3 s12">
+            <h5 class="white-text">Полезные ссылки</h5>
+            <ul>
+              <li><a class="white-text" href="https://github.com/The-Galley/vk_parser">Проект на Github</a></li>
+              <li><a class="white-text" href="/docs/swagger">Swagger API</a></li>
+            </ul>
+          </div>
+        </div>
+      </div>
+      <div class="footer-copyright">
+        <div class="container">
+        Made by <a class="orange-text text-lighten-3" href="https://github.com/andy-takker/">Sergey Natalenko</a>
+        </div>
+      </div>
+    </footer>
+    {% block js %}
+      <script type="text/javascript" src="{{ url_for('static', path='/js/jquery-3.7.1.min.js') }}"></script>
+      <script type="text/javascript" src="{{ url_for('static', path='/js/materialize.min.js') }}"></script>
+    {% endblock js %}
+  </body>
+</html>

@@ -32,13 +32,13 @@ def stairway_db() -> str:
 
 @pytest.fixture(scope="session")
 def real_pg_dsn(localhost: str, real_db: str) -> URL:
-    default = f"postgresql+asyncpg://pguser:pguser@{localhost}:5432/{real_db}"
+    default = f"postgresql+asyncpg://pguser:pgpass@{localhost}:5432/{real_db}"
     return URL(os.environ.get("APP_PG_URL", default))
 
 
 @pytest.fixture(scope="session")
 def postgres_pg_dsn(localhost: str) -> URL:
-    default = f"postgresql+asyncpg://pguser:pguser@{localhost}:5432/postgres"
+    default = f"postgresql+asyncpg://pguser:pgpass@{localhost}:5432/postgres"
     return URL(os.environ.get("APP_BASE_PG_URL", default))
 
 
